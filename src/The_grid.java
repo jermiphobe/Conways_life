@@ -71,7 +71,7 @@ class Grid_canvas extends JPanel {
 		}
 		
 		System.out.println("Repaint");
-		revalidate();
+		repaint();
 	}
 	
 	public ArrayList<ArrayList<Town>> get_town_list() {

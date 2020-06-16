@@ -8,6 +8,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.JButton;
@@ -76,6 +77,7 @@ class Grid_frame extends JFrame {
 				//Randomly fill grid to make a new board
 				case KeyEvent.VK_N:
 					canvas.populate_towns();
+					canvas.save_town();
 					
 					break;
 				
@@ -101,10 +103,31 @@ class Grid_frame extends JFrame {
 					
 				//Will create a blank board and pause the simulation
 				case KeyEvent.VK_C:
-					if (canvas.is_running()) {
-						canvas.stop_timer();
+					if (!canvas.is_running()) {
+						canvas.create_towns();
+						repaint();
 					}
 					
+					break;
+					
+				//Will save the current board
+				case KeyEvent.VK_S:
+					if (!canvas.is_running()) {
+						canvas.save_town();
+					}
+					
+					break;
+					
+				//Will restart from saved board
+				case KeyEvent.VK_R:
+					canvas.restart_town();
+					repaint();
+					
+					break;
+					
+				//Draws where your mouse is
+				case KeyEvent.VK_D:
+					break;
 					
 					
 				}
@@ -144,7 +167,7 @@ class Grid_frame extends JFrame {
 		label_panel.setLayout(new GridLayout(0, 1));
 		
 		//An array holding the help messages
-		String[] help_items = {"H - Help menu", "N - New board", "P - Pause simulation", "ESC - Close window", "I - Increment simulation"};
+		String[] help_items = {"H - Help menu", "N - New board", "P - Pause simulation", "ESC - Close window", "I - Increment simulation", "S - Save current board", "C - Clear board", "R - Restart"};
 		
 		//Loops through to create labels and adds them to the panel
 		for (int i = 0; i < help_items.length; i += 1) {
@@ -182,6 +205,7 @@ class Grid_frame extends JFrame {
 	//Randomly fill square in the grid
 	public void populate_towns() {
 		canvas.populate_towns();
+		canvas.save_town();
 	}
 	
 	//Start the timer
@@ -193,6 +217,7 @@ class Grid_frame extends JFrame {
 
 class Grid_canvas extends JPanel {
 	
+	ArrayList<ArrayList<Town>> orig_towns = new ArrayList<>();
 	ArrayList<ArrayList<Town>> towns = new ArrayList<>();
 	Random rand = new Random();
 	
@@ -221,6 +246,8 @@ class Grid_canvas extends JPanel {
 	
 	//Function to create the grid of towns - empty board
 	public void create_towns() {
+		
+		towns = new ArrayList<>();
 		
 		int curr_small = 0;
 		int curr_big = 0;
@@ -265,10 +292,20 @@ class Grid_canvas extends JPanel {
 			
 			curr_town.populate_town();
 			
-			repaint();
-			
 		}
 		
+		repaint();
+		
+	}
+	
+	//Saves the current town
+	public void save_town() {
+		orig_towns = towns;
+	}
+	
+	//Resets the board from the saved board
+	public void restart_town() {
+		towns = orig_towns;
 	}
 	
 	//Will figure out if each box will live or die
@@ -460,7 +497,7 @@ class Grid_canvas extends JPanel {
 				town_x += town_size;
 				town_y += town_size * 3;
 				
-				//If the curser is within the current town, add it as a town
+				//If the cursor is within the current town, add it as a town
 				if (town_x < x && town_x + town_size > x) {
 					if (town_y < y && town_y + town_size > y) {
 						curr_town.populate_town();

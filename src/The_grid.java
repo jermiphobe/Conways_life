@@ -51,7 +51,7 @@ public class The_grid {
 class Grid_frame extends JFrame {
 	Grid_canvas canvas = new Grid_canvas();
 	
-	//Adds timers and key listeners
+	//Adds key listeners
 	Grid_frame() {
 		add(canvas);
 		
@@ -73,20 +73,24 @@ class Grid_frame extends JFrame {
 					
 					break;
 					
+				//Randomly fill grid to make a new board
 				case KeyEvent.VK_N:
 					canvas.populate_towns();
 					
 					break;
-					
+				
+				//A help window pops up with key commands
 				case KeyEvent.VK_H:
 					help_window();
 					
 					break;
-					
+				
+				//Closes the simulation
 				case KeyEvent.VK_ESCAPE:
 					System.exit(0);
 					break;
 					
+				//If paused, it increments the simulation one generation
 				case KeyEvent.VK_I:
 					if (!canvas.is_running()) {
 						canvas.get_next_generation();
@@ -95,6 +99,7 @@ class Grid_frame extends JFrame {
 					
 					break;
 					
+				//Will create a blank board and pause the simulation
 				case KeyEvent.VK_C:
 					if (canvas.is_running()) {
 						canvas.stop_timer();
@@ -108,6 +113,7 @@ class Grid_frame extends JFrame {
 			
 		});
 		
+		//Looks for a mouse click then adds a new town where clicked
 		addMouseListener(new MouseAdapter() {
 		    public void mouseClicked(MouseEvent e) {
 		    		int mouse_x = e.getX();
@@ -120,29 +126,27 @@ class Grid_frame extends JFrame {
 		
 	}
 	
+	//Function to create the help window
 	public void help_window() {
 		canvas.stop_timer();
 		
 		JFrame help_frame = new JFrame();
 		
 		JButton button = new JButton("Close");
-		JLabel message = new JLabel("N - New board \n", SwingConstants.CENTER);
-		JLabel message_2 = new JLabel("P - Pause simulation \n", SwingConstants.CENTER);
-		JLabel message_3 = new JLabel("H - Help menu \n", SwingConstants.CENTER);
 		
+		//Sets the frame for the help window
 		help_frame.setSize(200, 400);
 		help_frame.setTitle("Help!");
 		help_frame.setLocation(550, 400);
 		
+		//Creates a panel for the help messages and sets the layout
 		JPanel label_panel = new JPanel();
-		
 		label_panel.setLayout(new GridLayout(0, 1));
 		
-		JLabel message1 = new JLabel("H - Help menu");
-		message1.setHorizontalAlignment(JLabel.CENTER);
-		
+		//An array holding the help messages
 		String[] help_items = {"H - Help menu", "N - New board", "P - Pause simulation", "ESC - Close window", "I - Increment simulation"};
 		
+		//Loops through to create labels and adds them to the panel
 		for (int i = 0; i < help_items.length; i += 1) {
 			String str = help_items[i];
 			
@@ -151,11 +155,13 @@ class Grid_frame extends JFrame {
 			label_panel.add(label);
 		}
          
+		//Adds close button and panel
 		help_frame.add(label_panel, BorderLayout.CENTER);
 		help_frame.add(button, BorderLayout.SOUTH);
 		
 		help_frame.repaint();
 		
+		//Watches for close button to be clicked
 		button.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e)
 		    {
@@ -197,6 +203,7 @@ class Grid_canvas extends JPanel {
 	
 	Timer board_timer;
 	
+	//Adds board timer
 	Grid_canvas() {
 		
 		board_timer = new Timer(50, new ActionListener() {
@@ -212,9 +219,8 @@ class Grid_canvas extends JPanel {
 		
 	}
 	
+	//Function to create the grid of towns - empty board
 	public void create_towns() {
-		
-		System.out.println("Created the towns");
 		
 		int curr_small = 0;
 		int curr_big = 0;
@@ -243,9 +249,11 @@ class Grid_canvas extends JPanel {
 		}
 	}
 	
+	//Randomly fills out the grid for a random board
 	public void populate_towns() {
 		int index = 0;
 		
+		//Loops once for each box - Can fill boxes more than once
 		for (int i = 0; i < total_towns; i += 1) {
 			index = rand.nextInt(total_towns);
 			
@@ -263,6 +271,7 @@ class Grid_canvas extends JPanel {
 		
 	}
 	
+	//Will figure out if each box will live or die
 	public void get_next_generation() {
 		
 		int curr_big = 0;
@@ -270,25 +279,33 @@ class Grid_canvas extends JPanel {
 		
 		int curr_town_index = 1;
 		
+		//Loops through big array
 		for (int i = 0; i < towns.size(); i += 1) {
 			
 			ArrayList<Town> curr_towns = towns.get(i);
 			
+			//Loops through small array
 			for (int j = 0; j < curr_towns.size(); j += 1) {
 				
+				//Gets current town and its neighbor count
 				Town curr_town = curr_towns.get(j);
 				int total_neighbors = get_neighbors(curr_big, curr_little);
 				
+				//If the town is empty, see if it can become alive
 				if (curr_town.is_empty()) {
 					
+					//3 neighbors to become alive
 					if (total_neighbors == 3) {
 						curr_town.set_next_round_alive();
 					} 
 					
+				//If the town is alive, see if it lives or dies
 				} else {
 					
+					//1 or less, or more than 3 neighbors to die
 					if (total_neighbors <= 1 || total_neighbors >= 4) {
 						curr_town.set_next_round_dead();
+					//2 or 3 neighbors to stay alive
 					} else {
 						curr_town.set_next_round_alive();
 					}
@@ -306,6 +323,7 @@ class Grid_canvas extends JPanel {
 			
 		}
 		
+		//Updates the is_empty variable based on next_round_alive variable
 		for (int i = 0; i < towns.size(); i += 1) {
 			
 			ArrayList<Town> curr_towns = towns.get(i);
@@ -323,6 +341,7 @@ class Grid_canvas extends JPanel {
 		
 	}
 	
+	//Lots of if statements to count total neighbors
 	public int get_neighbors(int big, int little) {
 		
 		int curr_big = big;
@@ -414,21 +433,26 @@ class Grid_canvas extends JPanel {
 		
 	}
 	
+	//Returns the current towns list
 	public ArrayList<ArrayList<Town>> get_town_list() {
 		
 		return towns;
 	}
 	
+	//Function to add a new town when you click on squares
 	public void add_new_town(int x, int y) {
 		
+		//Loops through big list
 		for (int i = 0; i < towns.size(); i += 1) {
 			
 			ArrayList<Town> curr_towns = towns.get(i);
 			
+			//Loops through small list
 			for (int j = 0; j < curr_towns.size(); j += 1) {
 				
 				Town curr_town = curr_towns.get(j);
 				
+				//Gets current town coordinates and modifies the mouse coordinates
 				int town_x = curr_town.get_x();
 				int town_y = curr_town.get_y();
 				int town_size = curr_town.get_town_size();
@@ -436,6 +460,7 @@ class Grid_canvas extends JPanel {
 				town_x += town_size;
 				town_y += town_size * 3;
 				
+				//If the curser is within the current town, add it as a town
 				if (town_x < x && town_x + town_size > x) {
 					if (town_y < y && town_y + town_size > y) {
 						curr_town.populate_town();
@@ -450,18 +475,22 @@ class Grid_canvas extends JPanel {
 		
 	}
 	
+	//Start the timer
 	public void start_timer() {
 		board_timer.start();
 	}
 	
+	//Stop the timer
 	public void stop_timer() {
 		board_timer.stop();
 	}
 	
+	//Returns true if the timer is running
 	public boolean is_running() {
 		return board_timer.isRunning();
 	}
 	
+	//Repaints the board
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
@@ -526,30 +555,37 @@ class Town {
 		g.drawRect(x_origin, y_origin, town_size, town_size);
 	}
 	
+	//Populates the town
 	public void populate_town() {
 		empty = false;
 	}
 	
+	//Kills the town
 	public void kill_town() {
 		empty = true;
 	}
 	
+	//Returns true if the town is empty
 	public boolean is_empty() {
 		return empty;
 	}
 	
+	//Returns the size of the town
 	public int get_town_size() {
 		return town_size;
 	}
 	
+	//Sets next round alive to true
 	public void set_next_round_alive() {
 		next_round_alive = true;
 	}
 	
+	//Sets next round alive to false
 	public void set_next_round_dead() {
 		next_round_alive = false;
 	}
 	
+	//Sets the current empty based on next round variable
 	public void set_next_round() {
 		if (next_round_alive) {
 			empty = false;
@@ -558,10 +594,12 @@ class Town {
 		}
 	}
 	
+	//Returns x origin
 	public int get_x() {
 		return x_origin;
 	}
 	
+	//Returns y origin
 	public int get_y() {
 		return y_origin;
 	}

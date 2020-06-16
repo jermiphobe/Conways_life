@@ -35,6 +35,9 @@ public class Game_of_life {
 		//Populate the grid
 		grid.populate_towns(pop_towns);
 		
+		//Start the simulation
+		grid.start_simulation();
+		
 	}
 
 }

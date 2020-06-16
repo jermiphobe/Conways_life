@@ -29,6 +29,21 @@ public class The_grid {
 		frame.populate_towns(amount);
 	}
 	
+	public void start_simulation() {
+		
+		while (true) {
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			frame.next_round();
+			
+		}
+	}
+	
 }
 
 class Grid_frame extends JFrame {
@@ -47,6 +62,10 @@ class Grid_frame extends JFrame {
 		canvas.populate_towns(amount);
 	}
 	
+	public void next_round() {
+		canvas.get_next_generation();
+	}
+	
 }
 
 class Grid_canvas extends JPanel {
@@ -54,56 +73,211 @@ class Grid_canvas extends JPanel {
 	ArrayList<ArrayList<Town>> towns = new ArrayList<>();
 	Random rand = new Random();
 	
+	int small_size = 180; //Columns - one row side to side <>
+	int big_size = 90;	  //Rows - add one more small size list ^v
+	
+	int total_towns = small_size * big_size;
+	
 	public void create_towns() {
 		
 		System.out.println("Created the towns");
 		
-		int curr_x = 0;
-		int curr_y = 0;
+		int curr_small = 0;
+		int curr_big = 0;
 		int town_size = 10;
 		
-		//Creates the square objects
-		for (int i = 0; i < 180; i += 1) {
+		//Creates the town objects
+		for (int i = 0; i < big_size; i += 1) {
 			
 			ArrayList<Town> temp_towns = new ArrayList<>();
 			
-			for (int j = 0; j < 90; j += 1) {
-				Town town = new Town(curr_x, curr_y, town_size);
+			for (int j = 0; j < small_size; j += 1) {
+				Town town = new Town(curr_small, curr_big, town_size);
 				temp_towns.add(town);
 				
 				//Increment curr_x
-				curr_y += town_size;
+				curr_small += town_size;
 			}
 			
 			towns.add(temp_towns);
 			
 			//Add side length to the curr_y
-			curr_x += town_size;
+			curr_big += town_size;
 			
 			//Reset curr_x
-			curr_y = 0;
+			curr_small = 0;
 		}
 	}
 	
 	public void populate_towns(int amount) {
-		int total_amount = amount * 162;
 		int index = 0;
 		
-		for (int i = 0; i < total_amount; i += 1) {
-			index = rand.nextInt(16200);
+		for (int i = 0; i < total_towns; i += 1) {
+			index = rand.nextInt(total_towns);
 			
-			System.out.println(index);
+			int small = index / 90;
+			int big = index % 90;
 			
-			int x = index / towns.size();
-			int y = index % towns.get(0).size();
-			
-			Town curr_town = towns.get(y).get(x);
+			ArrayList<Town> curr_town_list = towns.get(big);
+			Town curr_town = curr_town_list.get(small);
 			
 			curr_town.populate_town();
+			
+			repaint();
+			
+		}
+		
+	}
+	
+	public void get_next_generation() {
+		
+		int curr_big = 0;
+		int curr_little = 0;
+		
+		int curr_town_index = 1;
+		
+		for (int i = 0; i < towns.size(); i += 1) {
+			
+			ArrayList<Town> curr_towns = towns.get(i);
+			
+			for (int j = 0; j < curr_towns.size(); j += 1) {
+				
+				Town curr_town = curr_towns.get(j);
+				int total_neighbors = get_neighbors(curr_big, curr_little);
+				
+				if (curr_town.is_empty()) {
+					
+					if (total_neighbors == 3) {
+						curr_town.set_next_round_alive();
+					} 
+					
+				} else {
+					
+					if (total_neighbors <= 1 || total_neighbors >= 4) {
+						curr_town.set_next_round_dead();
+					} else {
+						curr_town.set_next_round_alive();
+					}
+					
+					
+				}
+				
+				curr_little += 1;
+				curr_town_index += 1;
+				
+			}
+			
+			curr_big += 1;
+			curr_little = 0;
+			
+		}
+		
+		for (int i = 0; i < towns.size(); i += 1) {
+			
+			ArrayList<Town> curr_towns = towns.get(i);
+			
+			for (int j = 0; j < curr_towns.size(); j += 1) {
+				
+				Town curr_town = curr_towns.get(j);
+				
+				curr_town.set_next_round();
+				
+			}
 			
 		}
 		
 		repaint();
+		
+	}
+	
+	public int get_neighbors(int big, int little) {
+		
+		int curr_big = big;
+		int curr_little = little;
+		
+		int new_big = 0;
+		int new_little = 0;
+		
+		int neighbors = 0;
+		
+		int little_size = towns.get(0).size();
+		int big_size = towns.size();
+		
+		//First square to try
+		new_big = curr_big - 1;
+		new_little = curr_little - 0;
+		if (new_big >= 0 && new_little >= 0 && !towns.get(new_big).get(new_little).is_empty()) {
+			
+			neighbors += 1;
+			
+		} 
+		
+		//Second square
+		new_big = curr_big - 1;
+		new_little = curr_little + 1;
+		if (new_big >= 0 && new_little < little_size && !towns.get(new_big).get(new_little).is_empty()) {
+			
+			neighbors += 1;
+			
+		} 
+		
+		//Third square
+		new_big = curr_big - 0;
+		new_little = curr_little + 1;
+		if (new_big >= 0 && new_little < little_size && !towns.get(new_big).get(new_little).is_empty()) {
+			
+			neighbors += 1;
+			
+		} 
+		
+		//Fourth square
+		new_big = curr_big + 1;
+		new_little = curr_little + 1;
+		if (new_big < big_size && new_little < little_size && !towns.get(new_big).get(new_little).is_empty()) {
+			
+			neighbors += 1;
+			
+		} 
+		
+		//Fifth square
+		new_big = curr_big + 1;
+		new_little = curr_little + 0;
+		if (new_big < big_size && new_little < little_size && !towns.get(new_big).get(new_little).is_empty()) {
+			
+			neighbors += 1;
+			
+		} 
+		
+		//Sixth square
+		new_big = curr_big + 1;
+		new_little = curr_little - 1;
+		if (new_big < big_size && new_little >= 0 && !towns.get(new_big).get(new_little).is_empty()) {
+			
+			neighbors += 1;
+			
+		}
+		
+		//Seventh square
+		new_big = curr_big + 0;
+		new_little = curr_little - 1;
+		if (new_big < big_size && new_little >= 0 && !towns.get(new_big).get(new_little).is_empty()) {
+			
+			neighbors += 1;
+			
+		} 
+		
+		//Eighth square
+		new_big = curr_big - 1;
+		new_little = curr_little - 1;
+		if (new_big >= 0 && new_little >= 0 && !towns.get(new_big).get(new_little).is_empty()) {
+			
+			neighbors += 1;
+			
+		} 
+		
+		//neighbors -= empty_towns;
+		
+		return neighbors;
 		
 	}
 	
@@ -149,7 +323,7 @@ class Town {
 	Color dark_green = new Color(0, 102, 0);
 	
 	Boolean empty = true;
-	Boolean next_round_empty = false;
+	Boolean next_round_alive = true;
 	
 	Town (int x, int y, int size) {
 		x_origin = x;
@@ -167,6 +341,7 @@ class Town {
 		g.drawRect(x_origin, y_origin, town_size, town_size);
 	}
 	
+	//Draw a full square
 	public void new_town(Graphics g) {
 		g.setColor(dark_green);
 		g.fillRect(x_origin, y_origin, town_size, town_size);
@@ -185,6 +360,26 @@ class Town {
 	
 	public boolean is_empty() {
 		return empty;
+	}
+	
+	public int get_town_size() {
+		return town_size;
+	}
+	
+	public void set_next_round_alive() {
+		next_round_alive = true;
+	}
+	
+	public void set_next_round_dead() {
+		next_round_alive = false;
+	}
+	
+	public void set_next_round() {
+		if (next_round_alive) {
+			empty = false;
+		} else {
+			empty = true;
+		}
 	}
 }
 

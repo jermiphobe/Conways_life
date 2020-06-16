@@ -33,7 +33,7 @@ public class The_grid {
 		
 		while (true) {
 			try {
-				Thread.sleep(250);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -22,7 +22,12 @@ public class The_grid {
 
 	Grid_frame frame = new Grid_frame();
 	
-	The_grid() {}
+	The_grid() {
+		
+		//Frame and canvas are created in the frame constructor.
+		
+		
+	}
 	
 	public static void main(String[] args) {
 		The_grid grid = new The_grid();
@@ -31,15 +36,14 @@ public class The_grid {
 }
 
 class Grid_frame extends JFrame {
-	Grid_canvas canvas = new Grid_canvas();
 	Boolean was_paused = true;
 	
 	int board_x = 1800;
 	int board_y = 900;
 	int window_y = board_y + 100;
 	
-	JPanel container = new JPanel();
-	JPanel menu = new JPanel();
+	Grid_canvas canvas = new Grid_canvas();
+	Menu_panel menu = new Menu_panel(board_x, board_y);
 	
 	//Adds key listeners
 	Grid_frame() {
@@ -51,11 +55,11 @@ class Grid_frame extends JFrame {
 		setLocation(75, 75);
 		setVisible(true);
 		setLayout(null);
+		setResizable(false);
 		
-		//Eventually make a class for this one
-		JPanel menu = new JPanel();
-		menu.setBackground(Color.BLUE);
-		menu.setSize(100, board_x);
+		
+		//Create and add the buttons
+		//add_buttons(menu);
 		
 		//Add board and menu panels
 		add(canvas);
@@ -64,10 +68,6 @@ class Grid_frame extends JFrame {
 		canvas.create_towns();
 		canvas.populate_towns();
 		canvas.start_timer();
-		
-		//Set locations for board and menu panels
-		canvas.setBounds(0, 0, board_x, board_y);
-		menu.setBounds(0, board_y, board_x, 100);
 
 		addKeyListener(new KeyAdapter() {
 			
@@ -265,7 +265,6 @@ class Grid_frame extends JFrame {
 	//Create the grid
 	public void create_towns() {
 		canvas.create_towns();
-		repaint();
 	}
 	
 	//Randomly fill square in the grid
@@ -274,9 +273,43 @@ class Grid_frame extends JFrame {
 		canvas.save_town();
 	}
 	
+	public void add_buttons(Menu_panel panel) {
+		JButton pause_button = new JButton("Pause");
+		pause_button.setVisible(true);
+		
+		pause_button.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e)
+		    {
+
+				if (canvas.is_running()) {
+					canvas.stop_timer();
+					pause_button.setText("  Play  ");
+					
+				} else {
+					canvas.start_timer();
+					pause_button.setText("Pause");
+					
+				}
+		    }
+		});
+		
+		panel.add(pause_button);
+		panel.repaint();
+	}
+	
 }
 
 class Menu_panel extends JPanel {
+	
+	Menu_panel(int board_x, int board_y) {
+
+		Color dark_grey = new Color(102, 102, 102);
+		
+		setBackground(dark_grey);
+		setSize(100, board_x);
+
+		setBounds(0, board_y, board_x, 100);
+	}
 	
 }
 
@@ -289,8 +322,8 @@ class Grid_canvas extends JPanel {
 	int small_size = 180; //Columns - one row side to side <>
 	int big_size = 90;	  //Rows - add one more small size list ^v
 	
-	int window_size_x = 1800;
-	int window_size_y = 900;
+	int window_x = 1800;
+	int window_y = 900;
 	
 	int total_towns = small_size * big_size;
 	
@@ -299,7 +332,8 @@ class Grid_canvas extends JPanel {
 	
 	Grid_canvas() {
 		
-		setSize(window_size_x, window_size_y);
+		setSize(window_x, window_y);
+		setBounds(0, 0, window_x, window_y);
 		
 		board_timer = new Timer(timer_int, new ActionListener() {
 	        @Override

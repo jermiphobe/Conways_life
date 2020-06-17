@@ -2,50 +2,30 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Random;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
 public class The_grid {
 
 	Grid_frame frame = new Grid_frame();
-	int window_size_x =1800;
-	int window_size_y = 900;
 	
-	The_grid() {
-		//Initializes the frame 'settings'
-		frame.setTitle("Conway's Game of Life");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(window_size_x + 16, window_size_y + 39);
-		frame.setVisible(true);
-		frame.setLocation(75, 100);
-		
-		frame.create_towns();
-		
-	}
+	The_grid() {}
 	
-	//Randomly fill squares in the grid
-	public void populate_towns() {
-		frame.populate_towns();
-	}
-
-	//Start the timer
-	public void start_simulation() {
-		frame.start_simulation();
-		
+	public static void main(String[] args) {
+		The_grid grid = new The_grid();
 	}
 	
 }
@@ -54,10 +34,41 @@ class Grid_frame extends JFrame {
 	Grid_canvas canvas = new Grid_canvas();
 	Boolean was_paused = true;
 	
+	int board_x = 1800;
+	int board_y = 900;
+	int window_y = board_y + 100;
+	
+	JPanel container = new JPanel();
+	JPanel menu = new JPanel();
+	
 	//Adds key listeners
 	Grid_frame() {
-		add(canvas);
 		
+		//Initializes the frame 'settings'
+		setTitle("Conway's Game of Life");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setSize(board_x + 16, window_y + 39);
+		setLocation(75, 75);
+		setVisible(true);
+		setLayout(null);
+		
+		//Eventually make a class for this one
+		JPanel menu = new JPanel();
+		menu.setBackground(Color.BLUE);
+		menu.setSize(100, board_x);
+		
+		//Add board and menu panels
+		add(canvas);
+		add(menu);
+		
+		canvas.create_towns();
+		canvas.populate_towns();
+		canvas.start_timer();
+		
+		//Set locations for board and menu panels
+		canvas.setBounds(0, 0, board_x, board_y);
+		menu.setBounds(0, board_y, board_x, 100);
+
 		addKeyListener(new KeyAdapter() {
 			
 			public void keyPressed(KeyEvent e) {
@@ -179,7 +190,6 @@ class Grid_frame extends JFrame {
 		    }
 		});
 		
-		
 	}
 	
 	//Function to create the help window
@@ -264,10 +274,9 @@ class Grid_frame extends JFrame {
 		canvas.save_town();
 	}
 	
-	//Start the timer
-	public void start_simulation() {
-		canvas.start_timer();
-	}
+}
+
+class Menu_panel extends JPanel {
 	
 }
 
@@ -280,12 +289,18 @@ class Grid_canvas extends JPanel {
 	int small_size = 180; //Columns - one row side to side <>
 	int big_size = 90;	  //Rows - add one more small size list ^v
 	
+	int window_size_x = 1800;
+	int window_size_y = 900;
+	
 	int total_towns = small_size * big_size;
 	
 	Timer board_timer;
 	int timer_int = 50;
 	
 	Grid_canvas() {
+		
+		setSize(window_size_x, window_size_y);
+		
 		board_timer = new Timer(timer_int, new ActionListener() {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
@@ -328,6 +343,8 @@ class Grid_canvas extends JPanel {
 			//Reset curr_x
 			curr_small = 0;
 		}
+		
+		repaint();
 	}
 	
 	//Randomly fills out the grid for a random board
@@ -392,6 +409,8 @@ class Grid_canvas extends JPanel {
 			
 			towns.add(temp_town);
 		}
+		
+		repaint();
 	}
 	
 	//Will figure out if each box will live or die
@@ -679,8 +698,9 @@ class Town {
 	int y_origin = 0;
 	int town_size = 0;
 	
-	Color light_gray = new Color(204, 204, 204);
-	Color dark_green = new Color(0, 102, 0);
+	Color light_grey = new Color(153, 153, 153);
+	Color dark_grey = new Color(102, 102, 102);
+	Color green = new Color(0, 204, 0);
 	
 	Boolean empty = true;
 	Boolean next_round_alive = false;
@@ -703,19 +723,19 @@ class Town {
 	
 	//Draw the empty square
 	public void draw_town(Graphics g) {
-		g.setColor(light_gray);
+		g.setColor(dark_grey);
 		g.fillRect(x_origin, y_origin, town_size, town_size);
 		
-		g.setColor(Color.black);
+		g.setColor(light_grey);
 		g.drawRect(x_origin, y_origin, town_size, town_size);
 	}
 	
 	//Draw a full square
 	public void new_town(Graphics g) {
-		g.setColor(dark_green);
+		g.setColor(green);
 		g.fillRect(x_origin, y_origin, town_size, town_size);
 		
-		g.setColor(Color.black);
+		g.setColor(light_grey);
 		g.drawRect(x_origin, y_origin, town_size, town_size);
 	}
 	

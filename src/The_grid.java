@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.JButton;
@@ -51,22 +52,11 @@ public class The_grid {
 
 class Grid_frame extends JFrame {
 	Grid_canvas canvas = new Grid_canvas();
-	Timer board_timer;
+	Boolean was_paused = true;
 	
 	//Adds key listeners
 	Grid_frame() {
 		add(canvas);
-		
-		board_timer = new Timer(50, new ActionListener() {
-	        @Override
-	        public void actionPerformed(ActionEvent e) {
-	    		
-	        	canvas.get_next_generation();
-	            
-	            repaint();
-	            
-	        }
-        });
 		
 		addKeyListener(new KeyAdapter() {
 			
@@ -116,31 +106,62 @@ class Grid_frame extends JFrame {
 					
 				//Will create a blank board and pause the simulation
 				case KeyEvent.VK_C:
-					canvas.create_towns();
 					canvas.stop_timer();
+					canvas.create_towns();
 					repaint();
 					
 					break;
 					
 				//Will save the current board
 				case KeyEvent.VK_S:
-					canvas.stop_timer();
+					was_paused = true;
+					
+					if (canvas.is_running()) {
+						canvas.stop_timer();
+						was_paused = false;
+					}
+					
 					canvas.save_town();
+					
+					if (!was_paused) {
+						canvas.start_timer();
+					}
 					
 					break;
 					
-				//Will restart from saved board
+				//Will restart from saved board and pause if it was paused before
 				case KeyEvent.VK_R:
-					canvas.stop_timer();
+					was_paused = true;
+					
+					if (canvas.is_running()) {
+						canvas.stop_timer();
+						was_paused = false;
+					}
+					
 					canvas.restart_town();
 					repaint();
+					
+					if (!was_paused) {
+						canvas.start_timer();
+					}
+					
+					break;
+				
+				//Increase simulation speed
+				case KeyEvent.VK_RIGHT:
+					canvas.dec_timer();
+					
+					break;
+					
+				//Decrease simulation timer
+				case KeyEvent.VK_LEFT:
+					canvas.inc_timer();
 					
 					break;
 					
 				//Draws where your mouse is
 				case KeyEvent.VK_D:
 					break;
-					
 					
 				}
 				
@@ -179,7 +200,8 @@ class Grid_frame extends JFrame {
 		label_panel.setLayout(new GridLayout(0, 1));
 		
 		//An array holding the help messages
-		String[] help_items = {"H - Help menu", "N - New board", "P - Pause simulation", "ESC - Close window", "I - Increment simulation", "S - Save current board", "C - Clear board", "R - Restart"};
+		String[] help_items = {"H - Help menu", "N - New board", "P - Pause simulation", "ESC - Close window", "I - Increment simulation", "S - Save current board", 
+								"C - Clear board", "R - Restart", "R Arrow - Increase speed", "L Arrow - Decrease speed"};
 		
 		//Loops through to create labels and adds them to the panel
 		for (int i = 0; i < help_items.length; i += 1) {
@@ -239,8 +261,20 @@ class Grid_canvas extends JPanel {
 	int total_towns = small_size * big_size;
 	
 	Timer board_timer;
+	int timer_int = 50;
 	
-	Grid_canvas() {}
+	Grid_canvas() {
+		board_timer = new Timer(timer_int, new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	    		
+	        	get_next_generation();
+	            
+	            repaint();
+	            
+	        }
+        });
+	}
 	
 	//Function to create the grid of towns - empty board
 	public void create_towns() {
@@ -298,12 +332,44 @@ class Grid_canvas extends JPanel {
 	
 	//Saves the current town
 	public void save_town() {
-		orig_towns = towns;
+		//orig_towns = towns;
+		orig_towns = new ArrayList<>();
+		for (int i = 0; i < towns.size(); i += 1) {
+			
+			ArrayList<Town> temp_town = new ArrayList<>();
+			ArrayList<Town> curr_town = towns.get(i);
+			
+			//Loop to make a copy of each town and add it to orig_town
+			for (int j = 0; j < curr_town.size(); j += 1) {
+				Town copy = curr_town.get(j);
+				
+				temp_town.add(new Town(copy));
+				
+			}
+			
+			orig_towns.add(temp_town);
+		}
 	}
 	
 	//Resets the board from the saved board
 	public void restart_town() {
-		towns = orig_towns;
+		//towns = orig_towns;
+		towns = new ArrayList<>();
+		for (int i = 0; i < orig_towns.size(); i += 1) {
+			
+			ArrayList<Town> temp_town = new ArrayList<>();
+			ArrayList<Town> curr_town = orig_towns.get(i);
+			
+			//Loop to make a copy of each town and add it to orig_town
+			for (int j = 0; j < curr_town.size(); j += 1) {
+				Town copy = curr_town.get(j);
+				
+				temp_town.add(new Town(copy));
+				
+			}
+			
+			towns.add(temp_town);
+		}
 	}
 	
 	//Will figure out if each box will live or die
@@ -311,8 +377,6 @@ class Grid_canvas extends JPanel {
 		
 		int curr_big = 0;
 		int curr_little = 0;
-		
-		int curr_town_index = 1;
 		
 		//Loops through big array
 		for (int i = 0; i < towns.size(); i += 1) {
@@ -349,7 +413,6 @@ class Grid_canvas extends JPanel {
 				}
 				
 				curr_little += 1;
-				curr_town_index += 1;
 				
 			}
 			
@@ -498,7 +561,12 @@ class Grid_canvas extends JPanel {
 				//If the cursor is within the current town, add it as a town
 				if (town_x < x && town_x + town_size > x) {
 					if (town_y < y && town_y + town_size > y) {
-						curr_town.populate_town();
+						if (curr_town.is_empty()) {
+							curr_town.populate_town();
+						} else {
+							curr_town.kill_town();
+							curr_town.kill_next_gen();
+						}
 					}
 				}
 				
@@ -525,6 +593,35 @@ class Grid_canvas extends JPanel {
 		return board_timer.isRunning();
 	}
 	
+	//Increase timer wait
+	public void inc_timer() {
+		timer_int += 50;
+		if (timer_int > 1000) {
+			timer_int = 1000;
+		}
+		
+		set_delay();
+		
+	}
+	
+	//Decrease timer weight
+	public void dec_timer() {
+		timer_int -= 50;
+		if (timer_int < 0) {
+			timer_int = 0;
+		}
+		
+		set_delay();
+	}
+	
+	//Set timer delay
+	public void set_delay() {
+		//board_timer.stop();
+		board_timer.setDelay(timer_int);
+		//board_timer.start();
+	}
+	
+	
 	//Repaints the board
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -547,6 +644,7 @@ class Grid_canvas extends JPanel {
 				}
 				
 			}
+			
 		}
 		
 	}
@@ -563,13 +661,22 @@ class Town {
 	Color dark_green = new Color(0, 102, 0);
 	
 	Boolean empty = true;
-	Boolean next_round_alive = true;
+	Boolean next_round_alive = false;
 	
 	Town (int x, int y, int size) {
 		x_origin = x;
 		y_origin = y;
 		town_size = size;
 		
+	}
+	
+	Town (Town copy) {
+		this.x_origin = copy.x_origin;
+		this.y_origin = copy.y_origin;
+		this.town_size = copy.town_size;
+		
+		this.empty = copy.empty;
+		this.next_round_alive = copy.next_round_alive;
 	}
 	
 	//Draw the empty square
@@ -598,6 +705,10 @@ class Town {
 	//Kills the town
 	public void kill_town() {
 		empty = true;
+	}
+	
+	public void kill_next_gen() {
+		next_round_alive = false;
 	}
 	
 	//Returns true if the town is empty

@@ -51,10 +51,22 @@ public class The_grid {
 
 class Grid_frame extends JFrame {
 	Grid_canvas canvas = new Grid_canvas();
+	Timer board_timer;
 	
 	//Adds key listeners
 	Grid_frame() {
 		add(canvas);
+		
+		board_timer = new Timer(50, new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	    		
+	        	canvas.get_next_generation();
+	            
+	            repaint();
+	            
+	        }
+        });
 		
 		addKeyListener(new KeyAdapter() {
 			
@@ -78,6 +90,7 @@ class Grid_frame extends JFrame {
 				case KeyEvent.VK_N:
 					canvas.populate_towns();
 					canvas.save_town();
+					canvas.start_timer();
 					
 					break;
 				
@@ -103,23 +116,22 @@ class Grid_frame extends JFrame {
 					
 				//Will create a blank board and pause the simulation
 				case KeyEvent.VK_C:
-					if (!canvas.is_running()) {
-						canvas.create_towns();
-						repaint();
-					}
+					canvas.create_towns();
+					canvas.stop_timer();
+					repaint();
 					
 					break;
 					
 				//Will save the current board
 				case KeyEvent.VK_S:
-					if (!canvas.is_running()) {
-						canvas.save_town();
-					}
+					canvas.stop_timer();
+					canvas.save_town();
 					
 					break;
 					
 				//Will restart from saved board
 				case KeyEvent.VK_R:
+					canvas.stop_timer();
 					canvas.restart_town();
 					repaint();
 					
@@ -228,21 +240,7 @@ class Grid_canvas extends JPanel {
 	
 	Timer board_timer;
 	
-	//Adds board timer
-	Grid_canvas() {
-		
-		board_timer = new Timer(50, new ActionListener() {
-	        @Override
-	        public void actionPerformed(ActionEvent e) {
-	    		
-	        	get_next_generation();
-	            
-	            repaint();
-	            
-	        }
-        });
-		
-	}
+	Grid_canvas() {}
 	
 	//Function to create the grid of towns - empty board
 	public void create_towns() {

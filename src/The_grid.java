@@ -200,8 +200,8 @@ class Grid_frame extends JFrame {
 		label_panel.setLayout(new GridLayout(0, 1));
 		
 		//An array holding the help messages
-		String[] help_items = {"H - Help menu", "N - New board", "P - Pause simulation", "ESC - Close window", "I - Increment simulation", "S - Save current board", 
-								"C - Clear board", "R - Restart", "R Arrow - Increase speed", "L Arrow - Decrease speed"};
+		String[] help_items = {"H - Help menu", "N - New board", "P - Pause simulation", "I - Increment simulation", "S - Save current board", 
+								"C - Clear board", "R - Restart", "R Arrow - Increase speed", "L Arrow - Decrease speed", "ESC - Close window"};
 		
 		//Loops through to create labels and adds them to the panel
 		for (int i = 0; i < help_items.length; i += 1) {
@@ -226,6 +226,28 @@ class Grid_frame extends JFrame {
 		       canvas.start_timer();
 		    }
 		});
+		
+		//Make escape close the help window
+		addKeyListener(new KeyAdapter() {
+			
+			public void keyPressed(KeyEvent e) {
+				switch(e.getKeyCode()) {
+				
+				//Closes the simulation
+				case KeyEvent.VK_ESCAPE:
+					help_frame.dispose();
+					canvas.start_timer();
+					
+					System.out.println("Close");
+					
+					break;
+					
+				}
+				
+			}
+			
+		});
+		
 		
 		help_frame.setVisible(true);
 	}

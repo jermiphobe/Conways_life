@@ -2,7 +2,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -11,7 +10,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Random;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -22,12 +20,7 @@ public class The_grid {
 
 	Grid_frame frame = new Grid_frame();
 	
-	The_grid() {
-		
-		//Frame and canvas are created in the frame constructor.
-		
-		
-	}
+	The_grid() {}
 	
 	public static void main(String[] args) {
 		The_grid grid = new The_grid();

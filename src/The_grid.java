@@ -727,7 +727,7 @@ class Town {
 	
 	Color light_grey = new Color(153, 153, 153);
 	Color dark_grey = new Color(102, 102, 102);
-	Color green = new Color(0, 204, 0);
+	Color green = new Color(64,224,208);
 	
 	Boolean empty = true;
 	Boolean next_round_alive = false;

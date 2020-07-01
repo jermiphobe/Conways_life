@@ -8,13 +8,20 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.Timer;
+import java.util.Scanner;
 
 public class The_grid {
 
@@ -25,7 +32,6 @@ public class The_grid {
 	public static void main(String[] args) {
 		The_grid grid = new The_grid();
 	}
-	
 }
 
 class Grid_frame extends JFrame {
@@ -60,6 +66,7 @@ class Grid_frame extends JFrame {
 		
 		canvas.create_towns();
 		canvas.populate_towns();
+		canvas.save_town();
 		canvas.start_timer();
 
 		addKeyListener(new KeyAdapter() {
@@ -163,14 +170,34 @@ class Grid_frame extends JFrame {
 					
 					break;
 					
-				//Draws where your mouse is
+				//Set a new random color
 				case KeyEvent.VK_D:
+					canvas.set_random_color();
+					
+					break;
+					
+				//Set color back to green
+				case KeyEvent.VK_G:
+					canvas.set_green();
+					
+					break;
+					
+				//Save the board to a file
+				case KeyEvent.VK_K:
+					canvas.stop_timer();
+					canvas.save_to_file();
+					canvas.start_timer();
+					
+					break;
+				
+				//Load a file
+				case KeyEvent.VK_L:
+					load_file();
+					
 					break;
 					
 				}
-				
 			}
-			
 		});
 		
 		//Looks for a mouse click then adds a new town where clicked
@@ -182,6 +209,8 @@ class Grid_frame extends JFrame {
 		    		canvas.add_new_town(mouse_x, mouse_y);
 		    }
 		});
+		
+		
 		
 	}
 	
@@ -204,7 +233,8 @@ class Grid_frame extends JFrame {
 		
 		//An array holding the help messages
 		String[] help_items = {"H - Help menu", "N - New board", "P - Pause simulation", "I - Increment simulation", "S - Save current board", 
-								"C - Clear board", "R - Restart", "R Arrow - Increase speed", "L Arrow - Decrease speed", "ESC - Close window"};
+								"C - Clear board", "R - Restart", "R Arrow - Increase speed", "L Arrow - Decrease speed", "ESC - Close window",
+								"D - Toggle random color", "G - Color to green", "K - Save board to file", "L - Load from file"};
 		
 		//Loops through to create labels and adds them to the panel
 		for (int i = 0; i < help_items.length; i += 1) {
@@ -230,29 +260,65 @@ class Grid_frame extends JFrame {
 		    }
 		});
 		
-		//Make escape close the help window
-		addKeyListener(new KeyAdapter() {
-			
-			public void keyPressed(KeyEvent e) {
-				switch(e.getKeyCode()) {
+		help_frame.setVisible(true);
+	}
+	
+	//Load board window
+	public void load_file() {
+		canvas.stop_timer();
+		JFrame load_frame = new JFrame();
+		
+		JButton button = new JButton("Submit");
+		
+		//Sets the frame for the load window
+		load_frame.setSize(200, 150);
+		load_frame.setTitle("Load");
+		load_frame.setLocation(550, 400);
+		
+		//Creates a panel for the text box and sets the layout
+		JPanel label_panel = new JPanel();
+		label_panel.setLayout(new GridLayout(0, 1));
+		
+		
+		//Create a label and a text box
+		JLabel label = new JLabel("Pick a file:");
+		label.setHorizontalAlignment(JLabel.CENTER);
+		JTextField file_to_use = new JTextField(20);
+		
+		//Adds label and text box
+		label_panel.add(label);
+		label_panel.add(file_to_use);
+         
+		//Adds submit button and panel
+		load_frame.add(label_panel, BorderLayout.CENTER);
+		load_frame.add(button, BorderLayout.SOUTH);
+		
+		load_frame.repaint();
+		label_panel.repaint();
+		
+		//Watches for close button to be clicked
+		button.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e)
+		    {
 				
-				//Closes the simulation
-				case KeyEvent.VK_ESCAPE:
-					help_frame.dispose();
+				File file;
+				
+				try {
+					file = new File(file_to_use.getText());
+					Scanner scan = new Scanner(file);
+					
+					canvas.load_from_file(scan);
 					canvas.start_timer();
+					load_frame.dispose();
 					
-					System.out.println("Close");
+				} catch (FileNotFoundException ex) {
 					
-					break;
-					
-				}
-				
-			}
-			
+				} 
+		       
+		    }
 		});
 		
-		
-		help_frame.setVisible(true);
+		load_frame.setVisible(true);
 	}
 	
 	//Create the grid
@@ -311,6 +377,8 @@ class Grid_canvas extends JPanel {
 	ArrayList<ArrayList<Town>> orig_towns = new ArrayList<>();
 	ArrayList<ArrayList<Town>> towns = new ArrayList<>();
 	Random rand = new Random();
+	Scanner input = new Scanner(System.in);
+	Color_manager colors = new Color_manager();
 	
 	int small_size = 180; //Columns - one row side to side <>
 	int big_size = 90;	  //Rows - add one more small size list ^v
@@ -355,7 +423,7 @@ class Grid_canvas extends JPanel {
 			ArrayList<Town> temp_towns = new ArrayList<>();
 			
 			for (int j = 0; j < small_size; j += 1) {
-				Town town = new Town(curr_small, curr_big, town_size);
+				Town town = new Town(curr_small, curr_big, town_size, colors);
 				temp_towns.add(town);
 				
 				//Increment curr_x
@@ -477,7 +545,6 @@ class Grid_canvas extends JPanel {
 						curr_town.set_next_round_alive();
 					}
 					
-					
 				}
 				
 				curr_little += 1;
@@ -501,10 +568,7 @@ class Grid_canvas extends JPanel {
 				curr_town.set_next_round();
 				
 			}
-			
 		}
-		
-		
 	}
 	
 	//Lots of if statements to count total neighbors
@@ -637,9 +701,7 @@ class Grid_canvas extends JPanel {
 						}
 					}
 				}
-				
 			}
-			
 		}
 		
 		repaint();
@@ -664,8 +726,8 @@ class Grid_canvas extends JPanel {
 	//Increase timer wait
 	public void inc_timer() {
 		timer_int += 50;
-		if (timer_int > 1000) {
-			timer_int = 1000;
+		if (timer_int > 1100) {
+			timer_int = 1100;
 		}
 		
 		set_delay();
@@ -689,6 +751,132 @@ class Grid_canvas extends JPanel {
 		//board_timer.start();
 	}
 	
+	//Sets a random color
+	public void set_random_color() {
+		Integer[] new_color = colors.get_random_color();
+		
+		for (int i = 0; i < towns.size(); i += 1) {
+			ArrayList<Town> temp_towns = towns.get(i);
+			
+			for (int j = 0; j < temp_towns.size(); j += 1) {
+				Town town = temp_towns.get(j);
+				town.set_random_color(new_color);
+				
+			}
+		}
+	}
+	
+	//Sets a random color
+	public void set_green() {
+		
+		for (int i = 0; i < towns.size(); i += 1) {
+			ArrayList<Town> temp_towns = towns.get(i);
+			
+			for (int j = 0; j < temp_towns.size(); j += 1) {
+				Town town = temp_towns.get(j);
+				town.set_green();
+			}
+		}
+	}
+	
+	//Save board to file
+	public void save_to_file() {
+		String filename;
+		
+		while (true) {
+			System.out.print("What do you want to call the file? > ");
+			filename = input.nextLine();
+			
+			try {
+				File new_board = new File(filename);
+				if (new_board.createNewFile()) {
+					break;
+				} else {
+					System.out.println("That file already exists");
+				}
+			} catch (IOException e) {
+				
+			}
+			
+		}
+		
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+			
+			for (int i = 0; i < towns.size(); i += 1) {
+				ArrayList<Town> temp_towns = towns.get(i);
+				
+				for (int j = 0; j < temp_towns.size(); j += 1) {
+					Town town = temp_towns.get(j);
+
+					if (town.is_empty()) {
+						writer.write("empty\n");
+					} else {
+						writer.write("full\n");
+					}
+					
+				}
+			}
+			
+			writer.close();
+			
+		} catch (IOException e) {
+			System.out.println("Stuffs broken");
+		}
+		
+		
+		
+	}
+	
+	//Load from file
+	public void load_from_file(Scanner scan) {
+		Boolean alive;
+		
+		ArrayList<ArrayList<Town>> new_towns = new ArrayList<>();
+		
+		for (int i = 0; i < towns.size(); i += 1) {
+			ArrayList<Town> temp_towns = new ArrayList<>();
+			ArrayList<Town> curr_towns = towns.get(i);
+			
+			for (int j = 0; j < curr_towns.size(); j += 1) {
+				Town curr_town = curr_towns.get(j);
+				String is_alive = scan.nextLine();
+				
+				if (is_alive.equals("full")) {
+					alive = false;
+				} else {
+					alive = true;
+				}
+				
+				//Town (Town copy, Boolean alive, Color color)
+				temp_towns.add(new Town(curr_town, alive, curr_town.get_color()));
+
+			}
+			
+			new_towns.add(temp_towns);
+		}
+
+		towns = new ArrayList<>();
+		for (int i = 0; i < orig_towns.size(); i += 1) {
+			
+			ArrayList<Town> temp_town = new ArrayList<>();
+			ArrayList<Town> curr_town = new_towns.get(i);
+			
+			//Loop to make a copy of each town and add it to orig_town
+			for (int j = 0; j < curr_town.size(); j += 1) {
+				Town copy = curr_town.get(j);
+				
+				temp_town.add(new Town(copy));
+				
+			}
+			
+			towns.add(temp_town);
+		}
+		
+		save_town();
+		repaint();
+		
+	}
 	
 	//Repaints the board
 	public void paintComponent(Graphics g) {
@@ -710,13 +898,9 @@ class Grid_canvas extends JPanel {
 				} else {
 					curr_town.new_town(g);
 				}
-				
 			}
-			
 		}
-		
 	}
-	
 }
 
 class Town {
@@ -725,17 +909,25 @@ class Town {
 	int y_origin = 0;
 	int town_size = 0;
 	
+	Color_manager colors;
+	Integer[] curr_color;
+	
 	Color light_grey = new Color(153, 153, 153);
 	Color dark_grey = new Color(102, 102, 102);
-	Color green = new Color(64,224,208);
+	Color green = new Color(0, 255, 0);
+	Color alive_color;
 	
 	Boolean empty = true;
 	Boolean next_round_alive = false;
 	
-	Town (int x, int y, int size) {
+	Town (int x, int y, int size, Color_manager color) {
 		x_origin = x;
 		y_origin = y;
 		town_size = size;
+		
+		colors = color;
+		curr_color = colors.get_random_color();
+		alive_color = green;
 		
 	}
 	
@@ -746,6 +938,22 @@ class Town {
 		
 		this.empty = copy.empty;
 		this.next_round_alive = copy.next_round_alive;
+		
+		this.colors = copy.colors;
+		this.curr_color = copy.curr_color;
+		this.alive_color = copy.alive_color;
+	}
+	
+	Town (Town copy, Boolean alive, Color color) {
+		this.x_origin = copy.x_origin;
+		this.y_origin = copy.y_origin;
+		this.town_size = copy.town_size;
+		
+		this.empty = alive;
+		
+		this.colors = copy.colors;
+		this.curr_color = copy.curr_color;
+		this.alive_color = color;
 	}
 	
 	//Draw the empty square
@@ -759,7 +967,7 @@ class Town {
 	
 	//Draw a full square
 	public void new_town(Graphics g) {
-		g.setColor(green);
+		g.setColor(alive_color);
 		g.fillRect(x_origin, y_origin, town_size, town_size);
 		
 		g.setColor(light_grey);
@@ -769,6 +977,11 @@ class Town {
 	//Populates the town
 	public void populate_town() {
 		empty = false;
+	}
+	
+	//Sets a random color
+	public void set_random_color(Integer[] new_color) {
+		alive_color = new Color(new_color[0], new_color[1], new_color[2]);
 	}
 	
 	//Kills the town
@@ -817,6 +1030,16 @@ class Town {
 	//Returns y origin
 	public int get_y() {
 		return y_origin;
+	}
+	
+	//Get the current color
+	public Color get_color() {
+		return alive_color;
+	}
+	
+	//Set the color to green
+	public void set_green() {
+		alive_color = green;
 	}
 }
 

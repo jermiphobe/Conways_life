@@ -283,11 +283,13 @@ class Grid_frame extends JFrame {
 		//Create a label and a text box
 		JLabel label = new JLabel("Pick a file:");
 		label.setHorizontalAlignment(JLabel.CENTER);
-		JTextField file_to_use = new JTextField(20);
+		//JTextField file_to_use = new JTextField(20);
+		
+		//Loop through available files and then create/add the buttons
 		
 		//Adds label and text box
 		label_panel.add(label);
-		label_panel.add(file_to_use);
+		//label_panel.add(file_to_use);
          
 		//Adds submit button and panel
 		load_frame.add(label_panel, BorderLayout.CENTER);
@@ -389,7 +391,7 @@ class Grid_canvas extends JPanel {
 	int total_towns = small_size * big_size;
 	
 	Timer board_timer;
-	int timer_int = 50;
+	int timer_int = 40;
 	
 	Grid_canvas() {
 		
@@ -725,9 +727,9 @@ class Grid_canvas extends JPanel {
 	
 	//Increase timer wait
 	public void inc_timer() {
-		timer_int += 50;
-		if (timer_int > 1100) {
-			timer_int = 1100;
+		timer_int += 20;
+		if (timer_int > 300) {
+			timer_int = 300;
 		}
 		
 		set_delay();
@@ -736,7 +738,7 @@ class Grid_canvas extends JPanel {
 	
 	//Decrease timer weight
 	public void dec_timer() {
-		timer_int -= 50;
+		timer_int -= 20;
 		if (timer_int < 0) {
 			timer_int = 0;
 		}

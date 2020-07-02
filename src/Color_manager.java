@@ -16,7 +16,7 @@ public class Color_manager {
 		try {
 			scan = new Scanner(file);
 		} catch (FileNotFoundException e) {
-			System.out.println("Oops, names file not found");
+			System.out.println("Oops, color file not found");
 		} 
 			  
 		

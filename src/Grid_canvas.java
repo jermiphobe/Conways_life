@@ -64,6 +64,7 @@ class Grid_canvas extends JPanel {
 			
 			for (int j = 0; j < small_size; j += 1) {
 				Town town = new Town(curr_small, curr_big, town_size, colors);
+				
 				temp_towns.add(town);
 				
 				//Increment curr_x
@@ -78,6 +79,34 @@ class Grid_canvas extends JPanel {
 			//Reset curr_x
 			curr_small = 0;
 		}
+		
+		repaint();
+	}
+	
+	//Clears the board
+	public void clear_board() {
+		ArrayList<ArrayList<Town>> new_towns = new ArrayList<>();
+		
+		//Creates the town objects
+		for (int i = 0; i < big_size; i += 1) {
+			
+			ArrayList<Town> temp_towns = new ArrayList<>();
+			
+			for (int j = 0; j < small_size; j += 1) {
+				
+				//(Town copy, Boolean alive, Color color)
+				Town old_town = towns.get(i).get(j);
+				Town town = new Town(old_town, true, old_town.get_color());
+				
+				
+				temp_towns.add(town);
+			}
+			
+			new_towns.add(temp_towns);
+			
+		}
+		
+		restart_town(new_towns);
 		
 		repaint();
 	}
@@ -126,19 +155,20 @@ class Grid_canvas extends JPanel {
 	}
 	
 	//Resets the board from the saved board
-	public void restart_town() {
-		//towns = orig_towns;
+	public void restart_town(ArrayList<ArrayList<Town>> old_towns) {
+		Color curr_color = towns.get(0).get(0).get_color();
+		
 		towns = new ArrayList<>();
-		for (int i = 0; i < orig_towns.size(); i += 1) {
+		for (int i = 0; i < old_towns.size(); i += 1) {
 			
 			ArrayList<Town> temp_town = new ArrayList<>();
-			ArrayList<Town> curr_town = orig_towns.get(i);
+			ArrayList<Town> curr_town = old_towns.get(i);
 			
 			//Loop to make a copy of each town and add it to orig_town
 			for (int j = 0; j < curr_town.size(); j += 1) {
 				Town copy = curr_town.get(j);
 				
-				temp_town.add(new Town(copy));
+				temp_town.add(new Town(copy, copy.is_empty(), curr_color));
 				
 			}
 			
@@ -304,9 +334,9 @@ class Grid_canvas extends JPanel {
 	}
 	
 	//Returns the current towns list
-	public ArrayList<ArrayList<Town>> get_town_list() {
+	public ArrayList<ArrayList<Town>> get_saved_list() {
 		
-		return towns;
+		return orig_towns;
 	}
 	
 	//Function to add a new town when you click on squares

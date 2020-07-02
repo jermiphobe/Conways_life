@@ -99,7 +99,7 @@ class Grid_frame extends JFrame {
 				//Will create a blank board and pause the simulation
 				case KeyEvent.VK_C:
 					canvas.stop_timer();
-					canvas.create_towns();
+					canvas.clear_board();
 					repaint();
 					
 					break;
@@ -130,7 +130,7 @@ class Grid_frame extends JFrame {
 						was_paused = false;
 					}
 					
-					canvas.restart_town();
+					canvas.restart_town(canvas.get_saved_list());
 					repaint();
 					
 					if (!was_paused) {
@@ -271,7 +271,8 @@ class Grid_frame extends JFrame {
 		canvas.stop_timer();
 		JFrame load_frame = new JFrame();
 		
-		File file = new File("C:\\Users\\jeremiah.koenig\\eclipse-workspace\\Conways_life");
+		//File file = new File("C:\\Users\\jeremiah.koenig\\eclipse-workspace\\Conways_life");	//For work laptop
+		File file = new File("D:\\Eclipse_java\\Conways_life");									//For home desktop
 		String[] files = file.list();
 		ArrayList<String> good_files = new ArrayList<>();
 		

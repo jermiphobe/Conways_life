@@ -22,7 +22,6 @@ class Grid_frame extends JFrame {
 	
 	int board_x = 1800;
 	int board_y = 900;
-	int window_y = board_y + 100;
 	
 	Grid_canvas canvas = new Grid_canvas();
 	Menu_panel menu = new Menu_panel(board_x, board_y);
@@ -33,7 +32,7 @@ class Grid_frame extends JFrame {
 		//Initializes the frame 'settings'
 		setTitle("Conway's Game of Life");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(board_x + 16, window_y + 39);
+		setSize(board_x + 16, board_y + 39);
 		setLocation(75, 75);
 		setVisible(true);
 		setLayout(null);
@@ -45,7 +44,6 @@ class Grid_frame extends JFrame {
 		
 		//Add board and menu panels
 		add(canvas);
-		add(menu);
 		
 		canvas.create_towns();
 		canvas.populate_towns();
@@ -197,9 +195,15 @@ class Grid_frame extends JFrame {
 	
 	//Function to create the help window
 	public void help_window() {
+		Boolean was_running = canvas.is_running();
 		canvas.stop_timer();
 		
 		JFrame help_frame = new JFrame();
+		
+		//Sets the frame for the help window
+		help_frame.setSize(200, 400);
+		help_frame.setTitle("Save");
+		help_frame.setLocation(550, 400);
 		
 		JButton button = new JButton("Close");
 		
@@ -232,8 +236,29 @@ class Grid_frame extends JFrame {
 		    public void actionPerformed(ActionEvent e)
 		    {
 		       help_frame.dispose();
-		       canvas.start_timer();
+		       if (was_running) {
+					canvas.start_timer();
+				}
 		    }
+		});
+		
+		button.addKeyListener(new KeyAdapter() {
+			
+			public void keyPressed(KeyEvent e) {
+				switch(e.getKeyCode()) {
+				
+				//Pause the simulation
+				case KeyEvent.VK_ESCAPE:
+					
+					help_frame.dispose();
+					if (was_running) {
+						canvas.start_timer();
+					}
+					
+					break;
+					
+				}
+			}
 		});
 		
 		help_frame.setVisible(true);
@@ -363,6 +388,39 @@ class Grid_frame extends JFrame {
 					
 				}
 		    }
+		});
+		
+		filename.addKeyListener(new KeyAdapter() {
+			
+			public void keyPressed(KeyEvent e) {
+				switch(e.getKeyCode()) {
+				
+				//Pause the simulation
+				case KeyEvent.VK_ENTER:
+					
+					String name = filename.getText();
+					
+					try {
+						File new_board = new File(name);
+						if (new_board.createNewFile()) {
+							canvas.save_to_file(name);
+							
+							if (was_running) {
+								canvas.start_timer();
+							}
+							
+							save_frame.dispose();
+						} else {
+							System.out.println("That file already exists");
+						}
+					} catch (IOException ex) {
+						
+					}
+					
+					break;
+					
+				}
+			}
 		});
 		
 		//Add the label and text box to the frame

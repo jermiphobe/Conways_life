@@ -421,25 +421,8 @@ class Grid_canvas extends JPanel {
 	}
 	
 	//Save board to file
-	public void save_to_file() {
-		String filename;
+	public void save_to_file(String filename) {
 		
-		while (true) {
-			System.out.print("What do you want to call the file? > ");
-			filename = input.nextLine();
-			
-			try {
-				File new_board = new File(filename);
-				if (new_board.createNewFile()) {
-					break;
-				} else {
-					System.out.println("That file already exists");
-				}
-			} catch (IOException e) {
-				
-			}
-			
-		}
 		
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));

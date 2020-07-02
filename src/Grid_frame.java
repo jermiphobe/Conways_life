@@ -8,13 +8,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 class Grid_frame extends JFrame {
 	Boolean was_paused = true;
@@ -202,11 +203,6 @@ class Grid_frame extends JFrame {
 		
 		JButton button = new JButton("Close");
 		
-		//Sets the frame for the help window
-		help_frame.setSize(200, 400);
-		help_frame.setTitle("Help!");
-		help_frame.setLocation(550, 400);
-		
 		//Creates a panel for the help messages and sets the layout
 		JPanel label_panel = new JPanel();
 		label_panel.setLayout(new GridLayout(0, 1));
@@ -262,7 +258,10 @@ class Grid_frame extends JFrame {
 		}
 		
 		//Sets the frame for the load window
-		load_frame.setSize(200, 150);
+		int window_height_base = 75;
+		int window_height = window_height_base + (25 * good_files.size());
+		
+		load_frame.setSize(200, window_height);
 		load_frame.setTitle("Load");
 		load_frame.setLocation(550, 400);
 		
@@ -305,6 +304,7 @@ class Grid_frame extends JFrame {
 					} 
 			       
 			    }
+			    
 			});
 			
 		}
@@ -321,9 +321,62 @@ class Grid_frame extends JFrame {
 	//Frame to save a board to file
 	public void save_file() {
 		Boolean was_running = canvas.is_running();
-		
 		canvas.stop_timer();
+		
+		//Creates the frame and panel
 		JFrame save_frame = new JFrame();
+		JPanel panel = new JPanel();
+		panel.setLayout(new GridLayout(0, 1));
+		
+		//Sets the frame for the save window
+		save_frame.setSize(200, 125);
+		save_frame.setTitle("Save");
+		save_frame.setLocation(550, 400);
+		
+		//Creates the label and text box
+		JLabel label = new JLabel("Enter the file name");
+		label.setHorizontalAlignment(JLabel.CENTER);
+		JTextField filename = new JTextField();
+		
+		//Create button and button listener
+		JButton button = new JButton("Submit");
+		button.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e)
+		    {
+				
+		    	String name = filename.getText();
+				
+				try {
+					File new_board = new File(name);
+					if (new_board.createNewFile()) {
+						canvas.save_to_file(name);
+						
+						if (was_running) {
+							canvas.start_timer();
+						}
+						
+						save_frame.dispose();
+					} else {
+						System.out.println("That file already exists");
+					}
+				} catch (IOException ex) {
+					
+				}
+		    }
+		});
+		
+		//Add the label and text box to the frame
+		panel.add(label);
+		panel.add(filename);
+		
+		//Adds submit button and panel
+		save_frame.add(panel, BorderLayout.CENTER);
+		save_frame.add(button, BorderLayout.SOUTH);		
+		
+		save_frame.repaint();
+		save_frame.repaint();
+				
+		save_frame.setVisible(true);
 		
 	}
 	

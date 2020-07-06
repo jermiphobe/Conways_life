@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
-
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -49,13 +48,13 @@ class Grid_canvas extends JPanel {
 	}
 	
 	//Function to create the grid of towns - empty board
-	public void create_towns() {
+	public void create_towns(int size) {
 		
 		towns = new ArrayList<>();
 		
 		int curr_small = 0;
 		int curr_big = 0;
-		int town_size = 10;
+		int town_size = size;
 		
 		//Creates the town objects
 		for (int i = 0; i < big_size; i += 1) {

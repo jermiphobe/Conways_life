@@ -1,5 +1,7 @@
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -19,33 +21,43 @@ import javax.swing.JTextField;
 
 class Grid_frame extends JFrame {
 	Boolean was_paused = true;
+	String os = get_os();
 	
-	int board_x = 1800;
-	int board_y = 900;
-	
+	Dimension screen_size = Toolkit.getDefaultToolkit().getScreenSize();
+
+	// the screen height
+	double screen_height = screen_size.getHeight();
+
+	// the screen width
+	double screen_width = screen_size.getWidth();
+	int board_x_temp = (int) (screen_width * .9);
+	int town_size = board_x_temp / 180;
+	int board_x = town_size * 180;
+	int board_y = town_size * 90;
+
 	Grid_canvas canvas = new Grid_canvas();
-	Menu_panel menu = new Menu_panel(board_x, board_y);
 	
 	//Adds key listeners
 	Grid_frame() {
 		
 		//Initializes the frame 'settings'
+		if (os.indexOf("win") >= 0) {
+			setSize(board_x + 16, board_y + 39);
+		} else if (os.indexOf("mac") >= 0) {
+			setSize(board_x, board_y);
+		}
+		
 		setTitle("Conway's Game of Life");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(board_x + 16, board_y + 39);
 		setLocation(75, 75);
 		setVisible(true);
 		setLayout(null);
 		setResizable(false);
 		
-		
-		//Create and add the buttons
-		//add_buttons(menu);
-		
 		//Add board and menu panels
 		add(canvas);
 		
-		canvas.create_towns();
+		canvas.create_towns(town_size);
 		canvas.populate_towns();
 		canvas.save_town();
 		canvas.start_timer();
@@ -182,8 +194,18 @@ class Grid_frame extends JFrame {
 		//Looks for a mouse click then adds a new town where clicked
 		addMouseListener(new MouseAdapter() {
 		    public void mouseClicked(MouseEvent e) {
-		    		int mouse_x = e.getX();
-		    		int mouse_y = e.getY();
+		    		int mouse_x = 0;
+		    		int mouse_y = 0;
+		    		
+		    		if (os.indexOf("win") >= 0) {
+		    			mouse_x = e.getX();
+		    			mouse_y = e.getY();
+		    			
+		    		} else if (os.indexOf("mac") >= 0) {
+		    			mouse_x = e.getX() - 8;
+		    			mouse_y = e.getY() - 8;
+		    			
+		    		}
 		    		
 		    		canvas.add_new_town(mouse_x, mouse_y);
 		    }
@@ -271,8 +293,8 @@ class Grid_frame extends JFrame {
 		canvas.stop_timer();
 		JFrame load_frame = new JFrame();
 		
-		//File file = new File("C:\\Users\\jeremiah.koenig\\eclipse-workspace\\Conways_life");	//For work laptop
-		File file = new File("D:\\Eclipse_java\\Conways_life");									//For home desktop
+		File file = new File("C:\\Users\\jeremiah.koenig\\eclipse-workspace\\Conways_life");	//For work laptop
+		//File file = new File("D:\\Eclipse_java\\Conways_life");									//For home desktop
 		String[] files = file.list();
 		ArrayList<String> good_files = new ArrayList<>();
 		
@@ -441,7 +463,7 @@ class Grid_frame extends JFrame {
 	
 	//Create the grid
 	public void create_towns() {
-		canvas.create_towns();
+		canvas.create_towns(town_size);
 	}
 	
 	//Randomly fill square in the grid
@@ -472,6 +494,11 @@ class Grid_frame extends JFrame {
 		
 		panel.add(pause_button);
 		panel.repaint();
+	}
+	
+	public String get_os() {
+		String os = System.getProperty("os.name").toLowerCase();
+		return os;
 	}
 	
 }

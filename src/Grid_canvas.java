@@ -156,6 +156,7 @@ class Grid_canvas extends JPanel {
 	
 	//Resets the board from the saved board
 	public void restart_town(ArrayList<ArrayList<Town>> old_towns) {
+		//Gets the current color of the squares
 		Color curr_color = towns.get(0).get(0).get_color();
 		
 		towns = new ArrayList<>();
@@ -168,6 +169,7 @@ class Grid_canvas extends JPanel {
 			for (int j = 0; j < curr_town.size(); j += 1) {
 				Town copy = curr_town.get(j);
 				
+				//Adds a copy of the town based on if it's empty or not and the current squares color
 				temp_town.add(new Town(copy, copy.is_empty(), curr_color));
 				
 			}

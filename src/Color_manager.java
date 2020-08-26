@@ -19,7 +19,6 @@ public class Color_manager {
 			System.out.println("Oops, color file not found");
 		} 
 			  
-		
 		while (scan.hasNextLine()) {
 			
 			String[] temp_color = scan.nextLine().split(",");

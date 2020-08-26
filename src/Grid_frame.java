@@ -272,7 +272,7 @@ class Grid_frame extends JFrame {
 		JFrame load_frame = new JFrame();
 		
 		//File file = new File("C:\\Users\\jeremiah.koenig\\eclipse-workspace\\Conways_life");	//For work laptop
-		File file = new File("D:\\Eclipse_java\\Conways_life");									//For home desktop
+		File file = new File(System.getProperty("user.dir"));									//For home desktop
 		String[] files = file.list();
 		ArrayList<String> good_files = new ArrayList<>();
 		

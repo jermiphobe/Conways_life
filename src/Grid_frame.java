@@ -271,8 +271,7 @@ class Grid_frame extends JFrame {
 		canvas.stop_timer();
 		JFrame load_frame = new JFrame();
 		
-		//File file = new File("C:\\Users\\jeremiah.koenig\\eclipse-workspace\\Conways_life");	//For work laptop
-		File file = new File(System.getProperty("user.dir"));									//For home desktop
+		File file = new File(System.getProperty("user.dir"));	//Finds PWD for loading boards
 		String[] files = file.list();
 		ArrayList<String> good_files = new ArrayList<>();
 		

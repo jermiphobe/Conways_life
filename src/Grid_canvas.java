@@ -48,13 +48,13 @@ class Grid_canvas extends JPanel {
 	}
 	
 	//Function to create the grid of towns - empty board
-	public void create_towns(int size) {
+	public void create_towns() {
 		
 		towns = new ArrayList<>();
 		
 		int curr_small = 0;
 		int curr_big = 0;
-		int town_size = size;
+		int town_size = window_x / small_size;
 		
 		//Creates the town objects
 		for (int i = 0; i < big_size; i += 1) {

@@ -193,6 +193,11 @@ class Grid_frame extends JFrame {
 		
 	}
 	
+	//Function to create a menu window (button controls as opposed to keyboard controls)
+	public void menu_window() {
+		
+	}
+	
 	//Function to create the help window
 	public void help_window() {
 		Boolean was_running = canvas.is_running();

@@ -175,6 +175,12 @@ class Grid_frame extends JFrame {
 					
 					break;
 					
+				//Open a menu with button controls
+				case KeyEvent.VK_M:
+					menu_window();
+					
+					break;
+					
 				}
 			}
 		});
@@ -195,7 +201,46 @@ class Grid_frame extends JFrame {
 	
 	//Function to create a menu window (button controls as opposed to keyboard controls)
 	public void menu_window() {
+		JFrame menu_frame = new JFrame();
 		
+		//Sets the frame for the help window
+		menu_frame.setSize(600, 300);
+		menu_frame.setTitle("Menu");
+		menu_frame.setLocation(550, 400);
+		
+		//Creat's the proper text for the button when you first open the menu
+		String pause_button_text = "";
+		if (canvas.is_running()) {
+			pause_button_text = "Pause";
+		} else {
+			pause_button_text = "Play";
+		}
+		
+		//Creats and adds the pause/play button
+		JButton pause_button = new JButton(pause_button_text);
+		menu_frame.add(pause_button);
+		
+		//Adds function to the play/pause button
+		pause_button.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e)
+		    {
+		    	if (canvas.is_running()) {
+					canvas.stop_timer();
+					pause_button.setText("Play");
+		    	} else {
+		    		canvas.start_timer();
+		    		pause_button.setText("Pause");
+		    	}
+		    	
+		    }
+		});
+		
+		JButton temp_button = new JButton("Hello there");
+		menu_frame.add(temp_button);
+		
+		menu_frame.repaint();
+		
+		menu_frame.setVisible(true);
 	}
 	
 	//Function to create the help window
@@ -207,7 +252,7 @@ class Grid_frame extends JFrame {
 		
 		//Sets the frame for the help window
 		help_frame.setSize(200, 400);
-		help_frame.setTitle("Save");
+		help_frame.setTitle("Help");
 		help_frame.setLocation(550, 400);
 		
 		JButton button = new JButton("Close");
@@ -374,7 +419,7 @@ class Grid_frame extends JFrame {
 		    public void actionPerformed(ActionEvent e)
 		    {
 				
-		    	String name = filename.getText();
+		    	String name = filename.getText() + ".txt";
 				
 				try {
 					File new_board = new File(name);

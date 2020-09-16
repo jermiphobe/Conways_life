@@ -235,9 +235,6 @@ class Grid_frame extends JFrame {
 		    }
 		});
 		
-		JButton temp_button = new JButton("Hello there");
-		menu_frame.add(temp_button);
-		
 		menu_frame.repaint();
 		
 		menu_frame.setVisible(true);

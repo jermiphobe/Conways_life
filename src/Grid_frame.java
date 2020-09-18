@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,7 +73,6 @@ class Grid_frame extends JFrame {
 				case KeyEvent.VK_N:
 					canvas.populate_towns();
 					canvas.save_town();
-					canvas.start_timer();
 					
 					break;
 				
@@ -194,19 +194,25 @@ class Grid_frame extends JFrame {
 		    		canvas.add_new_town(mouse_x, mouse_y);
 		    }
 		});
-		
-		
-		
+	
 	}
 	
 	//Function to create a menu window (button controls as opposed to keyboard controls)
 	public void menu_window() {
 		JFrame menu_frame = new JFrame();
+		Color button_color = new Color(244, 187, 255);
 		
 		//Sets the frame for the help window
 		menu_frame.setSize(600, 300);
-		menu_frame.setTitle("Menu");
+		menu_frame.setTitle("Button Menu");
 		menu_frame.setLocation(550, 400);
+		menu_frame.setResizable(false);
+		menu_frame.setAlwaysOnTop(true);
+		menu_frame.getContentPane().setBackground(new Color(102, 102, 102));
+		
+		//Create and set layout
+		GridLayout button_layout = new GridLayout(0, 4, 10, 10);
+		menu_frame.setLayout(button_layout);
 		
 		//Creat's the proper text for the button when you first open the menu
 		String pause_button_text = "";
@@ -216,8 +222,9 @@ class Grid_frame extends JFrame {
 			pause_button_text = "Play";
 		}
 		
-		//Creats and adds the pause/play button
-		JButton pause_button = new JButton(pause_button_text);
+		//Create and adds the pause/play button
+		RoundedButton pause_button = new RoundedButton(pause_button_text);
+		pause_button.setBackground(button_color);
 		menu_frame.add(pause_button);
 		
 		//Adds function to the play/pause button
@@ -226,17 +233,141 @@ class Grid_frame extends JFrame {
 		    {
 		    	if (canvas.is_running()) {
 					canvas.stop_timer();
-					pause_button.setText("Play");
+					pause_button.setLabel("Play");
 		    	} else {
 		    		canvas.start_timer();
-		    		pause_button.setText("Pause");
+		    		pause_button.setLabel("Pause");
 		    	}
 		    	
 		    }
 		});
 		
-		menu_frame.repaint();
+		//Create and add the increment simulation button
+		RoundedButton increment_button = new RoundedButton("Increment");
+		increment_button.setBackground(button_color);
+		menu_frame.add(increment_button);
 		
+		//Add functionality to the increment button
+		increment_button.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e)
+		    {
+		    	if (!canvas.is_running()) {
+					canvas.get_next_generation();
+					repaint();
+				}
+		    	
+		    }
+		});
+		
+		//Create and add the change color button
+		RoundedButton color_button = new RoundedButton("New Color");
+		color_button.setBackground(button_color);
+		menu_frame.add(color_button);
+		
+		//Adds functionality to the color button
+		color_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				canvas.set_random_color();
+			}
+			
+		});
+		
+		//Create and add the reset to green button
+		RoundedButton green_button = new RoundedButton("Color -> Green");
+		green_button.setBackground(button_color);
+		menu_frame.add(green_button);
+		
+		//Add functionality to the green button
+		green_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				canvas.set_green();
+			}
+			
+		});
+		
+		//Create and add save file button
+		RoundedButton save_button = new RoundedButton("Save to File");
+		save_button.setBackground(button_color);
+		menu_frame.add(save_button);
+		
+		//Add functionality to the save button
+		save_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				save_file();
+			}
+			
+		});
+		
+		//Create and add load file button
+		RoundedButton load_button = new RoundedButton("Load from File");
+		load_button.setBackground(button_color);
+		menu_frame.add(load_button);
+		
+		//Add functionality to the load button
+		load_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				load_file();
+			}
+			
+		});
+		
+		//Create and add the clear board button
+		RoundedButton clear_button = new RoundedButton("Clear Board");
+		clear_button.setBackground(button_color);
+		menu_frame.add(clear_button);
+		
+		//Add functionality to the clear board button
+		clear_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				pause_button.setLabel("Play");
+				canvas.stop_timer();
+				canvas.clear_board();
+				repaint();
+			}
+			
+		});
+		
+		//Create and add the new board button
+		RoundedButton new_button = new RoundedButton("New Board");
+		new_button.setBackground(button_color);
+		menu_frame.add(new_button);
+		
+		//Add functionality to the new board button
+		new_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				canvas.populate_towns();
+				canvas.save_town();
+			}
+			
+		});
+		
+		//Create and add the save board button
+		RoundedButton save_board_button = new RoundedButton("Save Board");
+		save_board_button.setBackground(button_color);
+		menu_frame.add(save_board_button);
+		
+		//Create and add the reset board button
+		RoundedButton reset_button = new RoundedButton("Reset Board");
+		reset_button.setBackground(button_color);
+		menu_frame.add(reset_button);
+		
+		//Create and add slow down button
+		RoundedButton slow_button = new RoundedButton("Slower");
+		slow_button.setBackground(button_color);
+		menu_frame.add(slow_button);
+		
+		//Create and add the speed up button
+		RoundedButton fast_button = new RoundedButton("Faster");
+		fast_button.setBackground(button_color);
+		menu_frame.add(fast_button);
+		
+		menu_frame.repaint();
 		menu_frame.setVisible(true);
 	}
 	

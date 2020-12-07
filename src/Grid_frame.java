@@ -352,20 +352,79 @@ class Grid_frame extends JFrame {
 		save_board_button.setBackground(button_color);
 		menu_frame.add(save_board_button);
 		
+		//Add functionality to the save board button
+		save_board_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				was_paused = true;
+				
+				if (canvas.is_running()) {
+					canvas.stop_timer();
+					was_paused = false;
+				}
+				
+				canvas.save_town();
+				
+				if (!was_paused) {
+					canvas.start_timer();
+				}
+			}
+			
+		});
+		
 		//Create and add the reset board button
 		RoundedButton reset_button = new RoundedButton("Reset Board");
 		reset_button.setBackground(button_color);
 		menu_frame.add(reset_button);
+		
+		//Add functionality to the reset board button
+		reset_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				was_paused = true;
+				
+				if (canvas.is_running()) {
+					canvas.stop_timer();
+					was_paused = false;
+				}
+				
+				canvas.restart_town(canvas.get_saved_list());
+				repaint();
+				
+				if (!was_paused) {
+					canvas.start_timer();
+				}
+			}
+			
+		});
 		
 		//Create and add slow down button
 		RoundedButton slow_button = new RoundedButton("Slower");
 		slow_button.setBackground(button_color);
 		menu_frame.add(slow_button);
 		
+		//Add functionality to the slow button
+		slow_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				canvas.inc_timer();
+			}
+			
+		});
+		
 		//Create and add the speed up button
 		RoundedButton fast_button = new RoundedButton("Faster");
 		fast_button.setBackground(button_color);
 		menu_frame.add(fast_button);
+		
+		//Add functionality to the fast button
+		fast_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) 
+			{
+				canvas.dec_timer();
+			}
+			
+		});
 		
 		menu_frame.repaint();
 		menu_frame.setVisible(true);

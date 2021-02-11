@@ -451,7 +451,7 @@ class Grid_frame extends JFrame {
 		//An array holding the help messages
 		String[] help_items = {"H - Help menu", "N - New board", "P - Pause simulation", "I - Increment simulation", "S - Save current board", 
 								"C - Clear board", "R - Restart", "R Arrow - Increase speed", "L Arrow - Decrease speed", "ESC - Close window",
-								"D - Set to random color", "G - Color to green", "K - Save board to file", "L - Load from file"};
+								"D - Set to random color", "G - Color to green", "K - Save board to file", "L - Load from file", "M - Button Menu"};
 		
 		//Loops through to create labels and adds them to the panel
 		for (int i = 0; i < help_items.length; i += 1) {

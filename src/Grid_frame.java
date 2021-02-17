@@ -187,12 +187,22 @@ class Grid_frame extends JFrame {
 		
 		//Looks for a mouse click then adds a new town where clicked
 		addMouseListener(new MouseAdapter() {
+			
 		    public void mouseClicked(MouseEvent e) {
 		    		int mouse_x = e.getX();
 		    		int mouse_y = e.getY();
 		    		
 		    		canvas.add_new_town(mouse_x, mouse_y);
 		    }
+		    
+		});
+		
+		addMouseMotionListener(new MouseAdapter() {
+
+		    public void mouseDragged(MouseEvent e) {
+		    	canvas.add_new_town_dragged(e.getX(), e.getY());
+		    }
+		    
 		});
 	
 	}

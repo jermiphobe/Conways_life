@@ -362,14 +362,48 @@ class Grid_canvas extends JPanel {
 				town_y += town_size * 3;
 				
 				//If the cursor is within the current town, add it as a town
-				if (town_x < x && town_x + town_size > x) {
-					if (town_y < y && town_y + town_size > y) {
+				if (town_x <= x && town_x + town_size > x) {
+					if (town_y <= y && town_y + town_size > y) {
 						if (curr_town.is_empty()) {
 							curr_town.populate_town();
 						} else {
 							curr_town.kill_town();
 							curr_town.kill_next_gen();
 						}
+					}
+				}
+			}
+		}
+		
+		repaint();
+		
+	}
+	
+	//Function to add a new town when you click on squares
+	public void add_new_town_dragged(int x, int y) {
+		
+		//Loops through big list
+		for (int i = 0; i < towns.size(); i += 1) {
+			
+			ArrayList<Town> curr_towns = towns.get(i);
+			
+			//Loops through small list
+			for (int j = 0; j < curr_towns.size(); j += 1) {
+				
+				Town curr_town = curr_towns.get(j);
+				
+				//Gets current town coordinates and modifies the mouse coordinates
+				int town_x = curr_town.get_x();
+				int town_y = curr_town.get_y();
+				int town_size = curr_town.get_town_size();
+				
+				town_x += town_size;
+				town_y += town_size * 3;
+				
+				//If the cursor is within the current town, add it as a town
+				if (town_x <= x && town_x + town_size > x) {
+					if (town_y <= y && town_y + town_size > y) {
+						curr_town.populate_town();
 					}
 				}
 			}

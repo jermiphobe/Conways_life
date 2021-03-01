@@ -15,7 +15,7 @@ class RoundedButton extends Component {
     ActionListener actionListener;     // Post action events to listeners
     String label;                      // The Button's text
     protected boolean pressed = false; // true if the button is detented.
-
+    boolean entered = false;
     /**
      * Constructs a RoundedButton with no label.
      */
@@ -58,13 +58,19 @@ class RoundedButton extends Component {
      */
     @Override
     public void paint(Graphics g) {
-
-        // paint the interior of the button
-        if (pressed) {
-            g.setColor(getBackground().darker().darker());
+        
+        if (entered) {
+        	  // paint the interior of the button
+            if (pressed) {
+                g.setColor(getBackground().darker().darker());
+            } else {
+            	g.setColor(getBackground().darker());;
+            }
+        	
         } else {
-            g.setColor(getBackground());
+        	g.setColor(getBackground());
         }
+        
         g.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
 
         // draw the perimeter of the button
@@ -125,16 +131,6 @@ class RoundedButton extends Component {
     }
 
     /**
-     * Determine if click was inside round button.
-     */
-    @Override
-    public boolean contains(int x, int y) {
-        int mx = getSize().width / 2;
-        int my = getSize().height / 2;
-        return (((mx - x) * (mx - x) + (my - y) * (my - y)) <= mx * mx);
-    }
-
-    /**
      * Paints the button and distribute an action event to all listeners.
      */
     @Override
@@ -164,7 +160,12 @@ class RoundedButton extends Component {
                 }
                 break;
             case MouseEvent.MOUSE_ENTERED:
+            	 entered = true;
 
+                 // Repaint might flicker a bit. To avoid this, you can use
+                 // double buffering (see the Gauge example).
+                 repaint();
+            	
                 break;
             case MouseEvent.MOUSE_EXITED:
                 if (pressed == true) {
@@ -182,6 +183,9 @@ class RoundedButton extends Component {
                     // issues that that you need to handle, which we leave
                     // this an an excercise for the reader (I always
                     // wanted to say that!)
+                } else {
+                	entered = false;
+                	repaint();
                 }
                 break;
         }

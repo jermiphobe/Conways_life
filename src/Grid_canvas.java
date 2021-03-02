@@ -22,15 +22,18 @@ class Grid_canvas extends JPanel {
 	int small_size = 180; //Columns - one row side to side <>
 	int big_size = 90;	  //Rows - add one more small size list ^v
 	
-	int window_x = 1800;
-	int window_y = 900;
+	int window_x;
+	int window_y;
 	
 	int total_towns = small_size * big_size;
 	
 	Timer board_timer;
 	int timer_int = 40;
 	
-	Grid_canvas() {
+	Grid_canvas(int win_x, int win_y) {
+		
+		window_x = win_x;
+		window_y = win_y;
 		
 		setSize(window_x, window_y);
 		setBounds(0, 0, window_x, window_y);

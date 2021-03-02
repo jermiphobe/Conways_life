@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,14 +22,18 @@ import javax.swing.JTextField;
 class Grid_frame extends JFrame {
 	Boolean was_paused = true;
 	
-	int board_x = 1800;
-	int board_y = 900;
+	int board_x;
+	int board_y;
 	
-	Grid_canvas canvas = new Grid_canvas();
-	Menu_panel menu = new Menu_panel(board_x, board_y);
+	Grid_canvas canvas;
 	
 	//Adds key listeners
 	Grid_frame() {
+		//Get the size of the screen and set the size of the frame accordingly
+		set_sizes();
+		
+		//Create the canvas
+		canvas = new Grid_canvas(board_x, board_y);
 		
 		//Initializes the frame 'settings'
 		setTitle("Conway's Game of Life");
@@ -38,10 +43,6 @@ class Grid_frame extends JFrame {
 		setVisible(true);
 		setLayout(null);
 		setResizable(false);
-		
-		
-		//Create and add the buttons
-		//add_buttons(menu);
 		
 		//Add board and menu panels
 		add(canvas);
@@ -205,6 +206,20 @@ class Grid_frame extends JFrame {
 		    
 		});
 	
+	}
+	
+	//Get the size of the screen and set the size of the frame accordingly
+	public void set_sizes() {
+		//Get the screen height to determine the frame size
+		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+		double screen_height = screenSize.getHeight();
+		double screen_width = screenSize.getWidth();
+		
+		//Calculate frame size
+		board_x = (int) (screen_width * .8);
+		int box = board_x / 180;
+		board_x = box * 180;
+		board_y = box * 90;
 	}
 	
 	//Function to create a menu window (button controls as opposed to keyboard controls)
@@ -683,17 +698,6 @@ class Grid_frame extends JFrame {
 				
 		save_frame.setVisible(true);
 		
-	}
-	
-	//Create the grid
-	public void create_towns() {
-		canvas.create_towns();
-	}
-	
-	//Randomly fill square in the grid
-	public void populate_towns() {
-		canvas.populate_towns();
-		canvas.save_town();
 	}
 	
 	public void add_buttons(Menu_panel panel) {

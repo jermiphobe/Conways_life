@@ -36,7 +36,6 @@ class Grid_canvas extends JPanel {
 		window_y = win_y;
 		
 		setSize(window_x, window_y);
-		setBounds(0, 0, window_x, window_y);
 		
 		board_timer = new Timer(timer_int, new ActionListener() {
 	        @Override

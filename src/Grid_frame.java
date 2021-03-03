@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -26,6 +27,7 @@ class Grid_frame extends JFrame {
 	int board_y;
 	
 	Grid_canvas canvas;
+	Insets insets = getInsets();
 	
 	//Adds key listeners
 	Grid_frame() {
@@ -40,12 +42,12 @@ class Grid_frame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(board_x + 16, board_y + 39);
 		setLocation(75, 75);
-		setVisible(true);
-		setLayout(null);
-		setResizable(false);
+		setLayout(new BorderLayout());
 		
 		//Add board and menu panels
-		add(canvas);
+		add(canvas, BorderLayout.CENTER);
+
+		setVisible(true);
 		
 		canvas.create_towns();
 		canvas.populate_towns();
@@ -198,7 +200,7 @@ class Grid_frame extends JFrame {
 		    
 		});
 		
-		addMouseMotionListener(new MouseAdapter() {
+		canvas.addMouseMotionListener(new MouseAdapter() {
 
 		    public void mouseDragged(MouseEvent e) {
 		    	canvas.add_new_town_dragged(e.getX(), e.getY());

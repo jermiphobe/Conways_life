@@ -111,6 +111,8 @@ public class Info_frame extends JFrame{
 			
 		});
 		
+		information.setBackground(background);
+		
 		//Add the components to the main panel
 		main_panel.add(main_label, BorderLayout.NORTH);
 		main_panel.add(information, BorderLayout.CENTER);

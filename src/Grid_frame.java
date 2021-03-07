@@ -2,7 +2,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -14,20 +13,34 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 class Grid_frame extends JFrame {
 	Boolean was_paused = true;
 	
 	int board_x;
 	int board_y;
+	int menu_height = 280;
 	
+	int x_size = 120;
+	int y_size = 60;
+	
+	JPanel main_canvas = new JPanel();
 	Grid_canvas canvas;
-	Insets insets = getInsets();
+	JPanel menu;
+
+	Color button_color = new Color(132, 132, 130);
+	Color background = new Color(242, 243, 244);
 	
 	//Adds key listeners
 	Grid_frame() {
@@ -35,211 +48,59 @@ class Grid_frame extends JFrame {
 		set_sizes();
 		
 		//Create the canvas
-		canvas = new Grid_canvas(board_x, board_y);
+		canvas = new Grid_canvas(board_x, board_y, x_size, y_size);
+		canvas.setPreferredSize(new Dimension(board_x,  board_y));
+		
+		//Add borders to the main canvas panel
+		main_canvas = new JPanel();
+		main_canvas.setBackground(background);
+		main_canvas.setSize(board_x + 20, board_y + 10);
+		main_canvas.setLayout(new BorderLayout());
+		add_borders(main_canvas, false);
+		main_canvas.add(canvas, BorderLayout.CENTER);
 		
 		//Initializes the frame 'settings'
 		setTitle("Conway's Game of Life");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(board_x + 16, board_y + 39);
+		setSize(board_x + 20, + board_y + menu_height + 40); // + 16, + 39
 		setLocation(75, 75);
 		setLayout(new BorderLayout());
 		
 		//Add board and menu panels
-		add(canvas, BorderLayout.CENTER);
-
+		add(main_canvas, BorderLayout.CENTER);
+		
+		//Set up the menu panel
+		menu_window();
+		add(menu, BorderLayout.SOUTH);
+		
 		setVisible(true);
 		
-		canvas.create_towns();
-		canvas.populate_towns();
-		canvas.save_town();
-		canvas.start_timer();
-
-		addKeyListener(new KeyAdapter() {
-			
-			public void keyPressed(KeyEvent e) {
-				switch(e.getKeyCode()) {
-				
-				//Pause the simulation
-				case KeyEvent.VK_P:
-					
-					if (canvas.is_running()) {
-						canvas.stop_timer();
-						
-					} else {
-						canvas.start_timer();
-						
-					}
-					
-					break;
-					
-				//Randomly fill grid to make a new board
-				case KeyEvent.VK_N:
-					canvas.populate_towns();
-					canvas.save_town();
-					
-					break;
-				
-				//A help window pops up with key commands
-				case KeyEvent.VK_H:
-					help_window();
-					
-					break;
-				
-				//Closes the simulation
-				case KeyEvent.VK_ESCAPE:
-					System.exit(0);
-					break;
-					
-				//If paused, it increments the simulation one generation
-				case KeyEvent.VK_I:
-					if (!canvas.is_running()) {
-						canvas.get_next_generation();
-						repaint();
-					}
-					
-					break;
-					
-				//Will create a blank board and pause the simulation
-				case KeyEvent.VK_C:
-					canvas.stop_timer();
-					canvas.clear_board();
-					repaint();
-					
-					break;
-					
-				//Will save the current board
-				case KeyEvent.VK_S:
-					was_paused = true;
-					
-					if (canvas.is_running()) {
-						canvas.stop_timer();
-						was_paused = false;
-					}
-					
-					canvas.save_town();
-					
-					if (!was_paused) {
-						canvas.start_timer();
-					}
-					
-					break;
-					
-				//Will restart from saved board and pause if it was paused before
-				case KeyEvent.VK_R:
-					was_paused = true;
-					
-					if (canvas.is_running()) {
-						canvas.stop_timer();
-						was_paused = false;
-					}
-					
-					canvas.restart_town(canvas.get_saved_list());
-					repaint();
-					
-					if (!was_paused) {
-						canvas.start_timer();
-					}
-					
-					break;
-				
-				//Increase simulation speed
-				case KeyEvent.VK_RIGHT:
-					canvas.dec_timer();
-					
-					break;
-					
-				//Decrease simulation timer
-				case KeyEvent.VK_LEFT:
-					canvas.inc_timer();
-					
-					break;
-					
-				//Set a new random color
-				case KeyEvent.VK_D:
-					canvas.set_random_color();
-					
-					break;
-					
-				//Set color back to green
-				case KeyEvent.VK_G:
-					canvas.set_green();
-					
-					break;
-					
-				//Save the board to a file
-				case KeyEvent.VK_K:
-					save_file();
-					
-					break;
-				
-				//Load a file
-				case KeyEvent.VK_L:
-					load_file();
-					
-					break;
-					
-				//Open a menu with button controls
-				case KeyEvent.VK_M:
-					menu_window();
-					
-					break;
-					
-				}
-			}
-		});
+		Info_frame info = new Info_frame(board_y + 30 + menu_height);
 		
-		//Looks for a mouse click then adds a new town where clicked
-		addMouseListener(new MouseAdapter() {
-			
-		    public void mouseClicked(MouseEvent e) {
-		    		int mouse_x = e.getX();
-		    		int mouse_y = e.getY();
-		    		
-		    		canvas.add_new_town(mouse_x, mouse_y);
-		    }
-		    
-		});
-		
-		canvas.addMouseMotionListener(new MouseAdapter() {
-
-		    public void mouseDragged(MouseEvent e) {
-		    	canvas.add_new_town_dragged(e.getX(), e.getY());
-		    }
-		    
-		});
-	
 	}
 	
 	//Get the size of the screen and set the size of the frame accordingly
 	public void set_sizes() {
 		//Get the screen height to determine the frame size
 		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-		double screen_height = screenSize.getHeight();
 		double screen_width = screenSize.getWidth();
 		
 		//Calculate frame size
 		board_x = (int) (screen_width * .8);
-		int box = board_x / 180;
-		board_x = box * 180;
-		board_y = box * 90;
+		int box = board_x / x_size; //Should get the necessary box side length
+		board_x = box * x_size;
+		board_y = box * y_size;
 	}
 	
-	//Function to create a menu window (button controls as opposed to keyboard controls)
+	//Function to create a menu panel (button controls as opposed to keyboard controls)
 	public void menu_window() {
-		JFrame menu_frame = new JFrame();
-		Color button_color = new Color(244, 187, 255);
+		
+		menu = new JPanel();
+		menu.setBackground(background);
 		
 		//Sets the frame for the help window
-		menu_frame.setSize(600, 300);
-		menu_frame.setTitle("Button Menu");
-		menu_frame.setLocation(550, 400);
-		menu_frame.setResizable(false);
-		menu_frame.setAlwaysOnTop(true);
-		menu_frame.getContentPane().setBackground(new Color(102, 102, 102));
-		
-		//Create and set layout
-		GridLayout button_layout = new GridLayout(0, 4, 10, 10);
-		menu_frame.setLayout(button_layout);
+		menu.setPreferredSize(new Dimension(600, menu_height));
+		menu.setLayout(new BorderLayout());
 		
 		//Creat's the proper text for the button when you first open the menu
 		String pause_button_text = "";
@@ -249,10 +110,20 @@ class Grid_frame extends JFrame {
 			pause_button_text = "Play";
 		}
 		
+		//Add borders to the menu panel
+		add_borders(menu, true);
+		
+		//Create the main center panel
+		JPanel center_menu = new JPanel();
+		center_menu.setPreferredSize(new Dimension(100, menu_height));
+		center_menu.setBackground(background);
+		center_menu.setLayout(new GridLayout(0, 6, 10, 10));
+		menu.add(center_menu, BorderLayout.CENTER);
+		
 		//Create and adds the pause/play button
 		RoundedButton pause_button = new RoundedButton(pause_button_text);
 		pause_button.setBackground(button_color);
-		menu_frame.add(pause_button);
+		center_menu.add(pause_button);
 		
 		//Adds function to the play/pause button
 		pause_button.addActionListener(new ActionListener() {
@@ -272,7 +143,7 @@ class Grid_frame extends JFrame {
 		//Create and add the increment simulation button
 		RoundedButton increment_button = new RoundedButton("Increment");
 		increment_button.setBackground(button_color);
-		menu_frame.add(increment_button);
+		center_menu.add(increment_button);
 		
 		//Add functionality to the increment button
 		increment_button.addActionListener(new ActionListener() {
@@ -289,7 +160,7 @@ class Grid_frame extends JFrame {
 		//Create and add the change color button
 		RoundedButton color_button = new RoundedButton("New Color");
 		color_button.setBackground(button_color);
-		menu_frame.add(color_button);
+		center_menu.add(color_button);
 		
 		//Adds functionality to the color button
 		color_button.addActionListener(new ActionListener() {
@@ -301,9 +172,9 @@ class Grid_frame extends JFrame {
 		});
 		
 		//Create and add the reset to green button
-		RoundedButton green_button = new RoundedButton("Color -> Green");
+		RoundedButton green_button = new RoundedButton("Color -> Yellow");
 		green_button.setBackground(button_color);
-		menu_frame.add(green_button);
+		center_menu.add(green_button);
 		
 		//Add functionality to the green button
 		green_button.addActionListener(new ActionListener() {
@@ -317,7 +188,7 @@ class Grid_frame extends JFrame {
 		//Create and add save file button
 		RoundedButton save_button = new RoundedButton("Save to File");
 		save_button.setBackground(button_color);
-		menu_frame.add(save_button);
+		center_menu.add(save_button);
 		
 		//Add functionality to the save button
 		save_button.addActionListener(new ActionListener() {
@@ -331,7 +202,7 @@ class Grid_frame extends JFrame {
 		//Create and add load file button
 		RoundedButton load_button = new RoundedButton("Load from File");
 		load_button.setBackground(button_color);
-		menu_frame.add(load_button);
+		center_menu.add(load_button);
 		
 		//Add functionality to the load button
 		load_button.addActionListener(new ActionListener() {
@@ -345,7 +216,7 @@ class Grid_frame extends JFrame {
 		//Create and add the clear board button
 		RoundedButton clear_button = new RoundedButton("Clear Board");
 		clear_button.setBackground(button_color);
-		menu_frame.add(clear_button);
+		center_menu.add(clear_button);
 		
 		//Add functionality to the clear board button
 		clear_button.addActionListener(new ActionListener() {
@@ -362,7 +233,7 @@ class Grid_frame extends JFrame {
 		//Create and add the new board button
 		RoundedButton new_button = new RoundedButton("New Board");
 		new_button.setBackground(button_color);
-		menu_frame.add(new_button);
+		center_menu.add(new_button);
 		
 		//Add functionality to the new board button
 		new_button.addActionListener(new ActionListener() {
@@ -377,7 +248,7 @@ class Grid_frame extends JFrame {
 		//Create and add the save board button
 		RoundedButton save_board_button = new RoundedButton("Save Board");
 		save_board_button.setBackground(button_color);
-		menu_frame.add(save_board_button);
+		center_menu.add(save_board_button);
 		
 		//Add functionality to the save board button
 		save_board_button.addActionListener(new ActionListener() {
@@ -402,7 +273,7 @@ class Grid_frame extends JFrame {
 		//Create and add the reset board button
 		RoundedButton reset_button = new RoundedButton("Reset Board");
 		reset_button.setBackground(button_color);
-		menu_frame.add(reset_button);
+		center_menu.add(reset_button);
 		
 		//Add functionality to the reset board button
 		reset_button.addActionListener(new ActionListener() {
@@ -425,36 +296,70 @@ class Grid_frame extends JFrame {
 			
 		});
 		
-		//Create and add slow down button
-		RoundedButton slow_button = new RoundedButton("Slower");
-		slow_button.setBackground(button_color);
-		menu_frame.add(slow_button);
+		//Create a slider to control the simulation speed
+		JSlider speed_slider = new JSlider(0, 300, 30);
+		JLabel speed_label = new JLabel("Select Simulation Speed");
+		JLabel speed_description = new JLabel("You're Zoomin!");
 		
-		//Add functionality to the slow button
-		slow_button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) 
-			{
-				canvas.inc_timer();
+		//The panel to hold them both
+		JPanel speed_panel = new JPanel();
+		speed_panel.setBackground(button_color);
+		speed_panel.setLayout(new GridLayout(0, 1, 0, 0));
+		speed_slider.setBackground(button_color);
+		
+		//Border for the JPanel
+		Border blackline = BorderFactory.createLineBorder(Color.black);
+		speed_panel.setBorder(blackline);
+		
+		speed_slider.setPaintTrack(true);
+		speed_slider.setMajorTickSpacing(50);
+		speed_slider.setPaintLabels(true);
+		
+		speed_label.setHorizontalAlignment(JLabel.CENTER);
+		speed_description.setHorizontalAlignment(JLabel.CENTER);
+		
+		speed_panel.add(speed_label);
+		speed_panel.add(speed_slider);
+		speed_panel.add(speed_description);
+		
+		//Initializes the change speed change listener
+		speed_slider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				int interval = speed_slider.getValue();
+				
+				canvas.set_delay(interval);
+				
+				if (interval < 100) {
+					speed_description.setText("You're Zoomin!");
+				} else if (interval < 200) {
+					speed_description.setText("You're Walkin");
+				} else {
+					speed_description.setText("You're Crawlin");
+				}
+				
 			}
 			
 		});
+		
+		center_menu.add(speed_panel);
 		
 		//Create and add the speed up button
-		RoundedButton fast_button = new RoundedButton("Faster");
-		fast_button.setBackground(button_color);
-		menu_frame.add(fast_button);
+		RoundedButton exit = new RoundedButton("Exit");
+		exit.setBackground(button_color);
+		center_menu.add(exit);
 		
 		//Add functionality to the fast button
-		fast_button.addActionListener(new ActionListener() {
+		exit.addActionListener(new ActionListener() {
+			
+			@Override
 			public void actionPerformed(ActionEvent e) 
 			{
-				canvas.dec_timer();
+				dispose();
 			}
 			
 		});
-		
-		menu_frame.repaint();
-		menu_frame.setVisible(true);
 	}
 	
 	//Function to create the help window
@@ -527,6 +432,32 @@ class Grid_frame extends JFrame {
 		
 		help_frame.setVisible(true);
 	}
+
+	//Add borders to a border layout jpanel
+	public void add_borders(JPanel panel, boolean bottom) {
+		//Add a small border around the menu panel
+		JPanel border_north = new JPanel();
+		border_north.setBackground(background);
+		border_north.setPreferredSize(new Dimension(10, 10));
+		panel.add(border_north, BorderLayout.NORTH);
+		
+		JPanel border_east = new JPanel();
+		border_east.setBackground(background);
+		border_east.setPreferredSize(new Dimension(10, 10));
+		panel.add(border_east, BorderLayout.EAST);
+		
+		if (bottom) {
+			JPanel border_south = new JPanel();
+			border_south.setBackground(background);
+			border_south.setPreferredSize(new Dimension(10, 10));
+			panel.add(border_south, BorderLayout.SOUTH);
+		}
+		
+		JPanel border_west = new JPanel();
+		border_west.setBackground(background);
+		border_west.setPreferredSize(new Dimension(10, 10));
+		panel.add(border_west, BorderLayout.WEST);
+	}
 	
 	//Load board window
 	public void load_file() {
@@ -542,7 +473,11 @@ class Grid_frame extends JFrame {
 		//Finds all files that end in .txt
 		for (String f: files) {
 			if (f.indexOf(".txt") > -1) {
-				good_files.add(f);
+				//Skip the info file
+				if (!f.equals("Game_of_life_info.txt")) {
+					good_files.add(f);
+				}
+				
 			}
 		}
 		
@@ -566,7 +501,7 @@ class Grid_frame extends JFrame {
 		label_panel.add(label);	
 		
 		//Loop through available files and then create/add the buttons
-		for (String board: good_files) {
+		for (String board: good_files) {			
 			JButton button = new JButton(board);
 			label_panel.add(button);
 			
@@ -700,30 +635,6 @@ class Grid_frame extends JFrame {
 				
 		save_frame.setVisible(true);
 		
-	}
-	
-	public void add_buttons(Menu_panel panel) {
-		JButton pause_button = new JButton("Pause");
-		pause_button.setVisible(true);
-		
-		pause_button.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e)
-		    {
-
-				if (canvas.is_running()) {
-					canvas.stop_timer();
-					pause_button.setText("  Play  ");
-					
-				} else {
-					canvas.start_timer();
-					pause_button.setText("Pause");
-					
-				}
-		    }
-		});
-		
-		panel.add(pause_button);
-		panel.repaint();
 	}
 	
 }

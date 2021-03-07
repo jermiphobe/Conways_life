@@ -2,6 +2,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,23 +21,26 @@ class Grid_canvas extends JPanel {
 	Scanner input = new Scanner(System.in);
 	Color_manager colors = new Color_manager();
 	
-	int small_size = 180; //Columns - one row side to side <>
-	int big_size = 90;	  //Rows - add one more small size list ^v
+	int small_size; //Columns - one row side to side <>
+	int big_size;	  //Rows - add one more small size list ^v
 	
 	int window_x;
 	int window_y;
 	
-	int total_towns = small_size * big_size;
+	int total_towns;
 	
 	Timer board_timer;
 	int timer_int = 40;
 	
-	Grid_canvas(int win_x, int win_y) {
+	Grid_canvas(int win_x, int win_y, int size_x, int size_y) {
 		
 		window_x = win_x;
 		window_y = win_y;
+		big_size = size_y;
+		small_size = size_x;
 		
 		setSize(window_x, window_y);
+		setBounds(0, 0, window_x, window_y);
 		
 		board_timer = new Timer(timer_int, new ActionListener() {
 	        @Override
@@ -47,6 +52,32 @@ class Grid_canvas extends JPanel {
 	            
 	        }
         });
+		
+		//Start the simulation
+		create_towns();
+		populate_towns();
+		save_town();
+		start_timer();
+		
+		//Looks for a mouse click then adds a new town where clicked
+		addMouseListener(new MouseAdapter() {
+			
+		    public void mouseClicked(MouseEvent e) {
+		    		int mouse_x = e.getX();
+		    		int mouse_y = e.getY();
+		    		
+		    		add_new_town(mouse_x, mouse_y);
+		    }
+		    
+		});
+		
+		addMouseMotionListener(new MouseAdapter() {
+
+		    public void mouseDragged(MouseEvent e) {
+		    	add_new_town_dragged(e.getX(), e.getY());
+		    }
+		    
+		});
 	}
 	
 	//Function to create the grid of towns - empty board
@@ -57,6 +88,7 @@ class Grid_canvas extends JPanel {
 		int curr_small = 0;
 		int curr_big = 0;
 		int town_size = window_x / small_size;
+		total_towns = small_size * big_size;
 		
 		//Creates the town objects
 		for (int i = 0; i < big_size; i += 1) {
@@ -114,14 +146,12 @@ class Grid_canvas extends JPanel {
 	
 	//Randomly fills out the grid for a random board
 	public void populate_towns() {
-		int index = 0;
 		
 		//Loops once for each box - Can fill boxes more than once
 		for (int i = 0; i < total_towns; i += 1) {
-			index = rand.nextInt(total_towns);
 			
-			int small = index / 90;
-			int big = index % 90;
+			int small = rand.nextInt(small_size);
+			int big = rand.nextInt(big_size);
 			
 			ArrayList<Town> curr_town_list = towns.get(big);
 			Town curr_town = curr_town_list.get(small);
@@ -246,91 +276,29 @@ class Grid_canvas extends JPanel {
 	
 	//Lots of if statements to count total neighbors
 	public int get_neighbors(int big, int little) {
-		
-		int curr_big = big;
-		int curr_little = little;
-		
-		int new_big = 0;
-		int new_little = 0;
-		
 		int neighbors = 0;
 		
-		int little_size = towns.get(0).size();
-		int big_size = towns.size();
-		
-		//First square to try
-		new_big = curr_big - 1;
-		new_little = curr_little - 0;
-		if (new_big >= 0 && new_little >= 0 && !towns.get(new_big).get(new_little).is_empty()) {
-			
-			neighbors += 1;
-			
-		} 
-		
-		//Second square
-		new_big = curr_big - 1;
-		new_little = curr_little + 1;
-		if (new_big >= 0 && new_little < little_size && !towns.get(new_big).get(new_little).is_empty()) {
-			
-			neighbors += 1;
-			
-		} 
-		
-		//Third square
-		new_big = curr_big - 0;
-		new_little = curr_little + 1;
-		if (new_big >= 0 && new_little < little_size && !towns.get(new_big).get(new_little).is_empty()) {
-			
-			neighbors += 1;
-			
-		} 
-		
-		//Fourth square
-		new_big = curr_big + 1;
-		new_little = curr_little + 1;
-		if (new_big < big_size && new_little < little_size && !towns.get(new_big).get(new_little).is_empty()) {
-			
-			neighbors += 1;
-			
-		} 
-		
-		//Fifth square
-		new_big = curr_big + 1;
-		new_little = curr_little + 0;
-		if (new_big < big_size && new_little < little_size && !towns.get(new_big).get(new_little).is_empty()) {
-			
-			neighbors += 1;
-			
-		} 
-		
-		//Sixth square
-		new_big = curr_big + 1;
-		new_little = curr_little - 1;
-		if (new_big < big_size && new_little >= 0 && !towns.get(new_big).get(new_little).is_empty()) {
-			
-			neighbors += 1;
-			
+		for (int i = -1; i < 2; i += 1) {
+			for (int j = -1; j < 2; j += 1) {
+				if (i == 0 && j == 0) {
+					continue;
+				}
+				
+				try {
+					
+					int new_x = big + i;
+					int new_y = little + j;
+					
+					Town temp_town = towns.get(new_x).get(new_y);
+					if (!temp_town.is_empty()) {
+						neighbors += 1;
+					}
+					
+				} catch (Exception e) {}
+				
+			}
 		}
 		
-		//Seventh square
-		new_big = curr_big + 0;
-		new_little = curr_little - 1;
-		if (new_big < big_size && new_little >= 0 && !towns.get(new_big).get(new_little).is_empty()) {
-			
-			neighbors += 1;
-			
-		} 
-		
-		//Eighth square
-		new_big = curr_big - 1;
-		new_little = curr_little - 1;
-		if (new_big >= 0 && new_little >= 0 && !towns.get(new_big).get(new_little).is_empty()) {
-			
-			neighbors += 1;
-			
-		} 
-		
-		//neighbors -= empty_towns;
 		
 		return neighbors;
 		
@@ -346,22 +314,15 @@ class Grid_canvas extends JPanel {
 	public void add_new_town(int x, int y) {
 		
 		//Loops through big list
-		for (int i = 0; i < towns.size(); i += 1) {
-			
-			ArrayList<Town> curr_towns = towns.get(i);
+		for (ArrayList<Town> curr_towns: towns) {
 			
 			//Loops through small list
-			for (int j = 0; j < curr_towns.size(); j += 1) {
-				
-				Town curr_town = curr_towns.get(j);
+			for (Town curr_town: curr_towns) {
 				
 				//Gets current town coordinates and modifies the mouse coordinates
 				int town_x = curr_town.get_x();
 				int town_y = curr_town.get_y();
 				int town_size = curr_town.get_town_size();
-				
-				town_x += town_size;
-				town_y += town_size * 3;
 				
 				//If the cursor is within the current town, add it as a town
 				if (town_x <= x && town_x + town_size > x) {
@@ -385,22 +346,15 @@ class Grid_canvas extends JPanel {
 	public void add_new_town_dragged(int x, int y) {
 		
 		//Loops through big list
-		for (int i = 0; i < towns.size(); i += 1) {
-			
-			ArrayList<Town> curr_towns = towns.get(i);
-			
-			//Loops through small list
-			for (int j = 0; j < curr_towns.size(); j += 1) {
-				
-				Town curr_town = curr_towns.get(j);
+		for (ArrayList<Town> curr_towns: towns) {
+					
+				//Loops through small list
+				for (Town curr_town: curr_towns) {
 				
 				//Gets current town coordinates and modifies the mouse coordinates
 				int town_x = curr_town.get_x();
 				int town_y = curr_town.get_y();
 				int town_size = curr_town.get_town_size();
-				
-				town_x += town_size;
-				town_y += town_size * 3;
 				
 				//If the cursor is within the current town, add it as a town
 				if (town_x <= x && town_x + town_size > x) {
@@ -436,8 +390,8 @@ class Grid_canvas extends JPanel {
 		if (timer_int > 300) {
 			timer_int = 300;
 		}
-		
-		set_delay();
+
+		set_delay(timer_int);
 		
 	}
 	
@@ -448,25 +402,22 @@ class Grid_canvas extends JPanel {
 			timer_int = 0;
 		}
 		
-		set_delay();
+		set_delay(timer_int);
 	}
 	
 	//Set timer delay
-	public void set_delay() {
-		//board_timer.stop();
-		board_timer.setDelay(timer_int);
-		//board_timer.start();
+	public void set_delay(int new_interval) {
+		timer_int = new_interval;
+		board_timer.setDelay(new_interval);
 	}
 	
 	//Sets a random color
 	public void set_random_color() {
 		Integer[] new_color = colors.get_random_color();
 		
-		for (int i = 0; i < towns.size(); i += 1) {
-			ArrayList<Town> temp_towns = towns.get(i);
+		for (ArrayList<Town> temp_towns: towns) {
 			
-			for (int j = 0; j < temp_towns.size(); j += 1) {
-				Town town = temp_towns.get(j);
+			for (Town town: temp_towns) {
 				town.set_random_color(new_color);
 				
 			}
@@ -476,11 +427,9 @@ class Grid_canvas extends JPanel {
 	//Sets a random color
 	public void set_green() {
 		
-		for (int i = 0; i < towns.size(); i += 1) {
-			ArrayList<Town> temp_towns = towns.get(i);
+		for (ArrayList<Town> temp_towns: towns) {
 			
-			for (int j = 0; j < temp_towns.size(); j += 1) {
-				Town town = temp_towns.get(j);
+			for (Town town: temp_towns) {
 				town.set_green();
 			}
 		}
@@ -493,11 +442,9 @@ class Grid_canvas extends JPanel {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
 			
-			for (int i = 0; i < towns.size(); i += 1) {
-				ArrayList<Town> temp_towns = towns.get(i);
+			for (ArrayList<Town> temp_towns: towns) {
 				
-				for (int j = 0; j < temp_towns.size(); j += 1) {
-					Town town = temp_towns.get(j);
+				for (Town town: temp_towns) {
 
 					if (town.is_empty()) {
 						writer.write("empty\n");

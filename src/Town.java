@@ -11,8 +11,8 @@ class Town {
 	Integer[] curr_color;
 	
 	Color light_grey = new Color(153, 153, 153);
-	Color dark_grey = new Color(102, 102, 102);
-	Color green = new Color(0, 255, 0);
+	Color dark_grey = new Color(132, 132, 130);//new Color(102, 102, 102);
+	Color green = new Color(255, 204, 0);//0, 255, 0);
 	Color alive_color;
 	
 	Boolean empty = true;

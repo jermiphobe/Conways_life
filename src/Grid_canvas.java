@@ -284,18 +284,13 @@ class Grid_canvas extends JPanel {
 					continue;
 				}
 				
-				try {
-					
-					int new_x = big + i;
-					int new_y = little + j;
-					
-					Town temp_town = towns.get(new_x).get(new_y);
-					if (!temp_town.is_empty()) {
-						neighbors += 1;
-					}
-					
-				} catch (Exception e) {}
+				int new_x = (big + i + towns.size()) % towns.size();
+				int new_y = (little + j + towns.get(0).size()) % towns.get(0).size();
 				
+				Town temp_town = towns.get(new_x).get(new_y);
+				if (!temp_town.is_empty()) {
+					neighbors += 1;
+				}
 			}
 		}
 		

@@ -294,7 +294,6 @@ class Grid_canvas extends JPanel {
 			}
 		}
 		
-		
 		return neighbors;
 		
 	}

@@ -2,13 +2,20 @@
 
 [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)
 
+This started out as a simple board to simulate the Game of Life.  It was a 2D array of 'town' objects that I would update.  Once I got the simulation up and running, I started making more features.  They started out as keyboard commands with an optional button menu, but I eventually replaced the keyboard command with a button menu that's always there.
 
 ### Controls
-Simulate -> Will start a simulation regardless of if one has already been started
-Clear -> Will stop the current simulation
-Play/Pause -> Will pause or restart a simulation.  It will not start a new simulation
-Optimze -> Will toggle an optimization to pick the move with the least amount of following moves
-Select Side Length -> Will change the board size.  It will only change if a simulation has been cleared
-Select Simulation Speed -> Will change the speed.  Will take effect during the next simulation or after you resume.
+You can click on squares to make a dead sdquare alive or an alive square dead.
+You can also click and drag to draw a pattern on the board.  
+You can draw on the board anytime, even if the simulation is in progress.
 
-When a simulation is cleared, you can select a new square to be the starting point by clicking on it.
+Play/Pause - This will start and stop the current simulation.
+Increment - If paused, this will move the simulation forward one generation.
+New color - this will change the towns to a random color
+Color -> Yello - this will change the towns back to the default color
+Save to File - You can save the current board state to a file
+Load from File - You can load a saved board to simulate (e.g. a glider gun preset)
+Clear Board - This will pause the simulation and 
+New Board - This will generate a random board
+Reset Board - This will revert the board to the state it was when you either first loaded a file or created a random board.
+Select Simulation Speed - This is how you change the speed of the simulation.  It will take effect immediately.
